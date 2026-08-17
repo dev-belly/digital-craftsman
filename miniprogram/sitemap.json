@@ -1,0 +1,9 @@
+{
+  "desc": "关于本 Mini Program 页面是否被索引的配置",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
+}

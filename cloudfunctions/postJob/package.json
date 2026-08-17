@@ -1,0 +1,9 @@
+{
+  "name": "postJob",
+  "version": "1.0.0",
+  "description": "企业发布实训、实习或正式岗位",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

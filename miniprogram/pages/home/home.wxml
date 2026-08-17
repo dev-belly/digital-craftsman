@@ -1,0 +1,209 @@
+<view wx:if="{{loading}}" class="home-state">
+  <view class="state-spinner"></view>
+  <view class="state-title">正在准备你的数字档案</view>
+  <view class="state-desc">从云端同步作品、认证与成长记录</view>
+</view>
+
+<view wx:elif="{{error}}" class="home-state">
+  <view class="state-icon">!</view>
+  <view class="state-title">档案暂时没有加载出来</view>
+  <view class="state-desc">{{error}}</view>
+  <button class="ui-btn ui-btn--primary ui-btn--medium retry-btn" bindtap="retryLoad" hover-class="ui-btn--pressed">重新加载</button>
+</view>
+
+<view wx:else class="container home-page">
+  <view class="identity-card">
+    <view class="identity-glow identity-glow--one"></view>
+    <view class="identity-glow identity-glow--two"></view>
+    <view class="identity-content">
+      <view class="avatar">{{userInitial}}</view>
+      <view class="identity-copy">
+        <view class="welcome">欢迎回来</view>
+        <view class="name">{{user.name || '未命名工匠'}}</view>
+        <view class="meta">{{user.school || '未填学校'}} · {{user.major || '未填专业'}}</view>
+      </view>
+      <view class="index-box">
+        <view class="index-num">{{user.talentIndex || 0}}</view>
+        <view class="index-label">人才指数</view>
+      </view>
+    </view>
+    <view class="identity-foot">
+      <view class="identity-trust"><text class="trust-dot"></text>档案已同步至云端</view>
+      <view class="identity-progress">成长阶段 {{completedStageCount}} / 5</view>
+    </view>
+  </view>
+
+  <view class="quick-grid">
+    <view class="quick-card" data-target="works" bindtap="goModule" hover-class="quick-card--pressed">
+      <view class="quick-icon quick-icon--work">作</view>
+      <view class="quick-value">{{stats.works}}</view>
+      <view class="quick-label">作品记录</view>
+      <view class="quick-arrow">›</view>
+    </view>
+    <view class="quick-card" data-target="certifications" bindtap="goModule" hover-class="quick-card--pressed">
+      <view class="quick-icon quick-icon--cert">证</view>
+      <view class="quick-value">{{stats.certifications}}</view>
+      <view class="quick-label">技能认证</view>
+      <view class="quick-arrow">›</view>
+    </view>
+    <view class="quick-card" data-target="evaluations" bindtap="goModule" hover-class="quick-card--pressed">
+      <view class="quick-icon quick-icon--eval">评</view>
+      <view class="quick-value">{{stats.evaluations}}</view>
+      <view class="quick-label">企业评价</view>
+      <view class="quick-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="card qr-card">
+    <view class="section-head">
+      <view>
+        <view class="section-title">我的档案码</view>
+        <view class="section-desc">让企业微信扫码查看你的公开档案</view>
+      </view>
+      <view wx:if="{{codeVersionLabel}}" class="version-pill">{{codeVersionLabel}}</view>
+    </view>
+
+    <view class="qr-area">
+      <image
+        wx:if="{{wxaCodeUrl}}"
+        class="wxa-code-img"
+        src="{{wxaCodeUrl}}"
+        mode="aspectFit"
+        show-menu-by-longpress="{{true}}"
+        bindtap="previewCode"
+        binderror="handleWxaCodeError"
+        hover-class="qr-code--pressed"
+      />
+      <view wx:elif="{{wxaCodeLoading}}" class="qr-state">
+        <view class="qr-loading"></view>
+        <view class="qr-state-text">正在生成可扫码的小程序码</view>
+      </view>
+      <view wx:else class="qr-state qr-state--error" bindtap="loadWxaCode" hover-class="qr-code--pressed">
+        <view class="qr-retry-icon">↻</view>
+        <view class="qr-state-text">{{wxaCodeError || '点击生成小程序码'}}</view>
+      </view>
+      <view class="qr-tip">点击可放大 · 长按可保存</view>
+    </view>
+
+    <view wx:if="{{codeVersionLabel && codeVersionLabel !== '正式版'}}" class="qr-version-notice">
+      <view class="qr-version-notice__icon">!</view>
+      <text wx:if="{{codeVersionLabel === '体验版'}}">体验版仅体验成员可扫码，正式发布后普通微信可打开</text>
+      <text wx:else>开发版仅项目成员可扫码；体验版仅体验成员可扫码，正式发布后普通微信可打开</text>
+    </view>
+
+    <button class="ui-btn ui-btn--secondary ui-btn--block archive-btn" bindtap="goArchive" hover-class="ui-btn--pressed">
+      <text>预览我的公开档案</text>
+      <text class="archive-arrow">→</text>
+    </button>
+  </view>
+
+  <view class="card growth-card">
+    <view class="section-head">
+      <view>
+        <view class="section-title">五阶段成长路径</view>
+        <view class="section-desc">当前进度会随作品、认证和评价更新</view>
+      </view>
+      <view class="progress-pill">{{completedStageCount}} / 5</view>
+    </view>
+    <view class="stage-track">
+      <block wx:for="{{stages}}" wx:key="stage">
+        <view class="stage-node">
+          <view class="stage-dot {{item.status}}">
+            <text wx:if="{{item.status === 'done'}}">✓</text>
+            <text wx:elif="{{item.status === 'doing'}}">•</text>
+            <text wx:else>{{index + 1}}</text>
+          </view>
+          <view class="stage-name {{item.status}}">{{item.stage}}</view>
+        </view>
+        <view wx:if="{{index < stages.length - 1}}" class="stage-line {{item.status === 'done' ? 'done' : ''}}"></view>
+      </block>
+    </view>
+    <view wx:if="{{currentStage}}" class="current-stage">
+      <view class="current-stage-label">{{currentStage.status === 'doing' ? '正在进行' : currentStage.status === 'pending' ? '下一阶段' : '成长路径'}}</view>
+      <view class="current-stage-name">{{currentStage.stage}}</view>
+      <view class="current-stage-hint">{{currentStage.status === 'done' ? '五阶段成长路径已完成' : '继续积累记录，解锁下一步成长'}}</view>
+    </view>
+  </view>
+
+  <view class="card invitation-card" wx:if="{{invitations.length}}">
+    <view class="section-head">
+      <view>
+        <view class="section-title">企业邀约</view>
+        <view class="section-desc">及时处理面试和实习邀请</view>
+      </view>
+      <view class="invite-count">{{invitations.length}}</view>
+    </view>
+    <view class="invite-item" wx:for="{{invitations}}" wx:key="_id">
+      <view class="invite-top">
+        <view class="invite-company">{{item.companyName}}</view>
+        <view class="invite-status invite-status--{{item.statusClass}}">{{item.statusLabel}}</view>
+      </view>
+      <view class="invite-type invite-{{item.typeClass}}">{{item.type}}邀约</view>
+      <view class="invite-message">{{item.message || '企业诚邀你进一步沟通'}}</view>
+      <view wx:if="{{item.status === 'pending' || !item.status}}" class="invite-actions">
+        <button
+          class="ui-btn ui-btn--outline ui-btn--small invite-action"
+          data-id="{{item._id}}"
+          data-action="declined"
+          loading="{{respondingInvitationId === item._id && respondingInvitationAction === 'declined'}}"
+          disabled="{{respondingInvitationId !== ''}}"
+          bindtap="respondInvitation"
+          hover-class="ui-btn--pressed"
+        >婉拒</button>
+        <button
+          class="ui-btn ui-btn--primary ui-btn--small invite-action"
+          data-id="{{item._id}}"
+          data-action="accepted"
+          loading="{{respondingInvitationId === item._id && respondingInvitationAction === 'accepted'}}"
+          disabled="{{respondingInvitationId !== ''}}"
+          bindtap="respondInvitation"
+          hover-class="ui-btn--pressed"
+        >接受邀约</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="card opportunity-card">
+    <view class="section-head">
+      <view>
+        <view class="section-title">成长机会</view>
+        <view class="section-desc">企业发布的实训、实习与正式岗位</view>
+      </view>
+      <view class="opportunity-count">{{opportunities.length}} 个</view>
+    </view>
+    <view wx:if="{{opportunities.length}}" class="opportunity-list">
+      <view class="opportunity-item" wx:for="{{opportunities}}" wx:key="_id">
+        <view class="opportunity-top">
+          <view class="opportunity-company">{{item.companyName || '认证企业'}}</view>
+          <view class="opportunity-type opportunity-type--{{item.typeClass}}">{{item.type}}</view>
+        </view>
+        <view class="opportunity-title">{{item.title}}</view>
+        <view class="opportunity-meta">{{item.location || '地点面议'}} · {{item.createdLabel}}</view>
+        <view class="opportunity-desc">{{item.desc}}</view>
+        <button
+          class="ui-btn ui-btn--small ui-btn--block opportunity-action opportunity-action--{{item.applicationClass}}"
+          data-id="{{item._id}}"
+          loading="{{applyingJobId === item._id}}"
+          disabled="{{applyingJobId !== '' || item.applicationStatus !== ''}}"
+          bindtap="applyJob"
+          hover-class="ui-btn--pressed"
+        >{{item.applicationLabel}}</button>
+      </view>
+    </view>
+    <view wx:else class="opportunity-empty">企业发布机会后会展示在这里</view>
+  </view>
+
+  <view class="card skill-card">
+    <view class="section-head">
+      <view>
+        <view class="section-title">我的技能标签</view>
+        <view class="section-desc">企业可以通过技能关键词找到你</view>
+      </view>
+      <view class="skill-count">{{user.skillTags.length || 0}} 项</view>
+    </view>
+    <view wx:if="{{user.skillTags.length}}" class="skill-list">
+      <text class="tag" wx:for="{{user.skillTags}}" wx:key="*this">{{item}}</text>
+    </view>
+    <view wx:else class="skill-empty">还没有技能标签，去「我的」完善档案</view>
+  </view>
+</view>

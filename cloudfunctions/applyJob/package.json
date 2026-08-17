@@ -1,0 +1,9 @@
+{
+  "name": "applyJob",
+  "version": "1.0.0",
+  "description": "学生申请实训、实习或正式岗位",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

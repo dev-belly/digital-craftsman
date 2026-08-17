@@ -1,0 +1,9 @@
+{
+  "name": "recover-account",
+  "version": "1.0.0",
+  "description": "通过最近登录的微信找回账号并安全重置密码",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

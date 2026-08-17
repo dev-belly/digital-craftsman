@@ -1,0 +1,63 @@
+<view class="container">
+  <view class="page-summary">
+    <view>
+      <view class="page-title">能力凭证</view>
+      <view class="page-desc">记录签发信息与内容哈希，便于核对凭证完整性</view>
+    </view>
+    <view class="summary-count">{{certs.length}}<text>项</text></view>
+  </view>
+
+  <view wx:if="{{loading}}" class="page-state">
+    <view class="state-spinner"></view>
+    <view class="state-title">正在同步认证记录</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="page-state">
+    <view class="state-icon">!</view>
+    <view class="state-title">认证记录暂时没有加载出来</view>
+    <view class="state-desc">{{error}}</view>
+    <button class="ui-btn ui-btn--primary ui-btn--medium retry-btn" bindtap="load" hover-class="ui-btn--pressed">重新加载</button>
+  </view>
+
+  <block wx:else>
+    <view class="card cert-card" wx:for="{{certs}}" wx:key="_id">
+      <view class="cert-head">
+        <view class="cert-icon">证</view>
+        <view class="cert-main">
+          <view class="cert-name">{{item.certName}}</view>
+          <view class="cert-meta">{{item.issuer}} · {{item.level}}</view>
+        </view>
+        <view class="cert-status">已记录</view>
+      </view>
+      <view
+        class="cert-proof"
+        data-index="{{index}}"
+        bindtap="toggleHash"
+        hover-class="cert-proof--pressed"
+      >
+        <view class="proof-dot">✓</view>
+        <text>签发信息已记录</text>
+        <view class="proof-divider"></view>
+        <text>{{item.certHash ? '哈希完整性校验' : '哈希记录待生成'}}</text>
+        <text wx:if="{{item.certHash}}" class="proof-action">{{item.hashVisible ? '收起' : '查看'}}</text>
+      </view>
+      <view
+        wx:if="{{item.hashVisible && item.certHash}}"
+        class="hash-detail"
+        data-index="{{index}}"
+        catchtap="copyHash"
+        hover-class="hash-detail--pressed"
+      >
+        <view class="hash-detail-label">凭证内容哈希</view>
+        <view class="hash-detail-value">{{item.fullHash}}</view>
+        <view class="hash-detail-copy">点击复制完整哈希</view>
+      </view>
+    </view>
+
+    <view wx:if="{{!certs.length}}" class="empty-state">
+      <view class="empty-icon">证</view>
+      <view class="empty-title">暂无认证记录</view>
+      <view class="empty-desc">通过技能认证后，凭证信息会展示在这里</view>
+    </view>
+  </block>
+</view>

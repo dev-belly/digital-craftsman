@@ -1,0 +1,9 @@
+{
+  "name": "register",
+  "version": "1.0.0",
+  "description": "学生和企业云端注册、密码哈希与档案初始化",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

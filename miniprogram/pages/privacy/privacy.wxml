@@ -1,0 +1,63 @@
+<view class="privacy-wrap">
+  <view wx:if="{{type === 'privacy'}}" class="privacy-content">
+    <view class="section">
+      <view class="section-title">隐私政策</view>
+      <view class="updated">更新日期：2026年7月</view>
+      <view class="text">本平台（"数字工匠成长学习小屋"）重视并保护您的个人信息。本政策说明我们如何收集、使用和保护您的个人信息。</view>
+
+      <view class="sub-title">1. 信息收集</view>
+      <view class="text">我们仅收集为您提供服务所必需的信息：</view>
+      <view class="text">· 微信 OpenID（用于识别当前微信、建立账号绑定并校验登录会话）</view>
+      <view class="text">· 校园账号与密码（以账号+密码登录；密码仅保存加盐哈希，不保存明文）</view>
+      <view class="text">· 注册密码的随机盐值和不可逆 PBKDF2 哈希（不保存明文密码）</view>
+      <view class="text">· 个人资料（注册时需填写姓名、学校和专业；头像、技能标签由您自愿填写）</view>
+      <view class="text">· 企业注册资料（企业名称、联系人、联系电话及自愿填写的统一社会信用代码）</view>
+      <view class="text">· 作品图片与文件（由您主动上传）</view>
+      <view class="text">· 企业评价内容（由企业提交）</view>
+
+      <view class="sub-title">2. 信息使用</view>
+      <view class="text">您的信息仅用于：建立个人数字档案、生成身份二维码、展示公开档案页面、计算人才指数、接收企业邀约。</view>
+      <view class="text">学生与企业账号均使用账号+密码登录；同一账号可在多个微信登录，同一微信也可登录多个账号。密码只以 PBKDF2 加盐哈希形式保存，不保存或返回明文。</view>
+      <view class="text">内部体验期间，新注册企业账号会自动开通；正式对外运营时，平台可能在核验企业资料后再开放人才查看、评价、邀约和岗位发布功能。</view>
+      <view class="text">公开档案会展示您填写的姓名、学校、专业、技能标签、作品、认证与评价；请勿填写或上传您不希望公开的信息。</view>
+
+      <view class="sub-title">3. 信息存储与完整性记录</view>
+      <view class="text">您的注册账号、档案与登录会话存储于腾讯云云开发数据库，不依赖开发者个人电脑。作品与评价的哈希值记录可追溯。</view>
+      <view class="text">真实学生默认不会出现在企业人才池；学生可在“我的”中主动开启或关闭人才池可见性。关闭后，已经主动分享的档案码仍可能被持有码的人访问。</view>
+
+      <view class="sub-title">4. 信息删除</view>
+      <view class="text">内部体验期间，您可通过体验群联系项目负责人请求更正或删除个人数据。数据删除后，相关公开档案将同步下线；正式上线前平台将补充固定联系渠道和处理时限。</view>
+
+      <view class="sub-title">5. 第三方服务</view>
+      <view class="text">本平台使用微信云开发（CloudBase）提供云函数、云数据库与云存储服务。</view>
+    </view>
+  </view>
+
+  <view wx:else class="privacy-content">
+    <view class="section">
+      <view class="section-title">用户协议</view>
+      <view class="updated">更新日期：2026年7月</view>
+
+      <view class="sub-title">1. 服务说明</view>
+      <view class="text">数字工匠成长学习小屋（以下简称"本平台"）为大学生提供个人能力档案管理、企业评价与人才对接服务。</view>
+
+      <view class="sub-title">2. 用户责任</view>
+      <view class="text">您承诺所提供的个人信息（学历、技能、作品等）真实有效。不得上传违法、侵权或虚假内容。</view>
+      <view class="text">学生和企业账号仅限本人或本企业授权人员使用。注册或登录前请确认使用的是正确的账号；如账号异常，应联系管理员处理。</view>
+
+      <view class="sub-title">3. 企业责任</view>
+      <view class="text">企业用户承诺注册资料真实有效，且所提供的评价内容真实、客观、公正。内部体验账号自动开通；正式对外运营时，平台可根据企业资质核验结果开通或停止企业端权限。平台会为评价生成哈希摘要和平台校验值，用于后续完整性校验。</view>
+
+      <view class="sub-title">4. 知识产权</view>
+      <view class="text">您上传的作品著作权归您所有。您授予本平台在平台内展示与传播的权利。</view>
+
+      <view class="sub-title">5. 免责声明</view>
+      <view class="text">本平台对用户与企业的线下行为不承担责任。平台不保证人才指数完全反映个人能力。</view>
+
+      <view class="sub-title">6. 协议变更</view>
+      <view class="text">本协议可能因法律法规或业务调整而更新。修改后的协议一经发布即生效。</view>
+    </view>
+  </view>
+
+  <button class="ui-btn ui-btn--secondary ui-btn--medium ui-btn--block back-btn" bindtap="onBack" hover-class="ui-btn--pressed">返回上一页</button>
+</view>

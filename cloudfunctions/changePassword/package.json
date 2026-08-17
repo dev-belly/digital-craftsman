@@ -1,0 +1,9 @@
+{
+  "name": "changePassword",
+  "version": "1.0.0",
+  "description": "首次设置或修改校园账号密码",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

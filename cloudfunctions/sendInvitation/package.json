@@ -1,0 +1,9 @@
+{
+  "name": "sendInvitation",
+  "version": "1.0.0",
+  "description": "企业向学生发送面试/实习邀约",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

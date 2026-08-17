@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "数字档案",
+  "navigationBarBackgroundColor": "#17377e",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f5f7fb",
+  "enablePullDownRefresh": false,
+  "usingComponents": {}
+}

@@ -1,0 +1,248 @@
+<view class="enterprise-page">
+  <view class="top-panel">
+    <view class="company-row">
+      <view class="company-logo">企</view>
+      <view class="company-main">
+        <view class="hello">企业端工作台</view>
+        <view class="company-name">{{company.companyName || '未命名企业'}}</view>
+      </view>
+      <view class="company-actions">
+        <view class="header-action" bindtap="goChangePassword" hover-class="header-action--pressed">改密</view>
+        <view class="header-action" bindtap="logout" hover-class="header-action--pressed">退出</view>
+      </view>
+    </view>
+    <view class="company-sub">扫码查看档案 · 评价学生 · 发布岗位</view>
+  </view>
+
+  <view class="action-grid">
+    <view class="action-card action-card--scan" bindtap="scanArchive" hover-class="action-card--pressed">
+      <view class="action-icon">扫</view>
+      <view class="action-title">扫码查看</view>
+      <view class="action-desc">扫描学生档案码</view>
+    </view>
+    <view class="action-card" bindtap="openJob" hover-class="action-card--pressed">
+      <view class="action-icon">岗</view>
+      <view class="action-title">发布岗位</view>
+      <view class="action-desc">实训/实习/正式岗位</view>
+    </view>
+  </view>
+
+  <view class="jobs-card">
+    <view class="jobs-head">
+      <view>
+        <view class="jobs-title">已发布岗位</view>
+        <view class="jobs-desc">最近发布的岗位会保存在云端</view>
+      </view>
+      <view class="jobs-count">{{jobs.length}} 个</view>
+    </view>
+    <view wx:if="{{loading}}" class="jobs-empty">正在同步云端岗位…</view>
+    <view wx:elif="{{jobs.length}}" class="job-list">
+      <view class="job-row" wx:for="{{jobs}}" wx:key="_id">
+        <view class="job-main">
+          <view class="job-name">{{item.title}}</view>
+          <view class="job-meta">{{item.type}}{{item.location ? ' · ' + item.location : ''}} · {{item.createdLabel}}</view>
+        </view>
+        <view class="job-status {{item.status}}">{{item.statusLabel}}</view>
+      </view>
+    </view>
+    <view wx:else class="jobs-empty">还没有岗位，点击上方“发布岗位”开始登记。</view>
+  </view>
+
+  <view class="activity-card" wx:if="{{applications.length || invitations.length}}">
+    <view class="jobs-head">
+      <view>
+        <view class="jobs-title">招聘进展</view>
+        <view class="jobs-desc">学生申请与已发送邀约都保存在云端</view>
+      </view>
+      <view class="jobs-count">{{applications.length + invitations.length}} 条</view>
+    </view>
+
+    <view wx:if="{{applications.length}}" class="activity-section">
+      <view class="activity-section-title">岗位申请</view>
+      <view class="activity-row" wx:for="{{applications}}" wx:key="_id">
+        <view class="activity-main">
+          <view class="activity-name">{{item.studentName || '学生'}} · {{item.jobTitle}}</view>
+          <view class="activity-meta">{{item.jobType}} · {{item.createdLabel}}</view>
+        </view>
+        <view class="activity-status activity-status--{{item.statusClass}}">{{item.statusLabel}}</view>
+        <view wx:if="{{item.status === 'pending' || !item.status}}" class="activity-actions">
+          <button
+            class="ui-btn ui-btn--outline ui-btn--small activity-btn"
+            data-id="{{item._id}}"
+            data-action="declined"
+            loading="{{managingApplicationId === item._id && managingApplicationAction === 'declined'}}"
+            disabled="{{managingApplicationId !== ''}}"
+            bindtap="manageApplication"
+            hover-class="ui-btn--pressed"
+          >婉拒</button>
+          <button
+            class="ui-btn ui-btn--primary ui-btn--small activity-btn"
+            data-id="{{item._id}}"
+            data-action="accepted"
+            loading="{{managingApplicationId === item._id && managingApplicationAction === 'accepted'}}"
+            disabled="{{managingApplicationId !== ''}}"
+            bindtap="manageApplication"
+            hover-class="ui-btn--pressed"
+          >接受</button>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{invitations.length}}" class="activity-section">
+      <view class="activity-section-title">已发送邀约</view>
+      <view class="activity-row activity-row--compact" wx:for="{{invitations}}" wx:key="_id">
+        <view class="activity-main">
+          <view class="activity-name">{{item.studentName}} · {{item.type}}邀约</view>
+          <view class="activity-meta">{{item.createdLabel}}</view>
+        </view>
+        <view class="activity-status activity-status--{{item.statusClass}}">{{item.statusLabel}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="search-card">
+    <view class="search-title">人才池</view>
+    <view class="search-row search-row--keyword">
+      <input
+        class="search-input"
+        maxlength="40"
+        value="{{keyword}}"
+        placeholder="技能关键词，如 AI、机器人"
+        placeholder-class="input-placeholder"
+        bindinput="onKeywordInput"
+        confirm-type="search"
+        bindconfirm="search"
+      />
+    </view>
+    <view class="search-row search-row--filters">
+      <input
+        class="index-input"
+        maxlength="3"
+        value="{{minIndex}}"
+        type="number"
+        placeholder="指数"
+        placeholder-class="input-placeholder"
+        bindinput="onMinIndexInput"
+      />
+      <button class="ui-btn ui-btn--primary ui-btn--small ui-btn--compact search-btn" bindtap="search" hover-class="ui-btn--pressed">检索</button>
+    </view>
+    <view class="search-help">在人才卡中可以查看档案、发送邀约或提交企业评价</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-state">正在读取企业人才池</view>
+
+  <view wx:elif="{{error}}" class="error-state">
+    <view class="error-icon">!</view>
+    <view class="error-title">人才池暂时没有加载出来</view>
+    <view class="error-desc">{{error}}</view>
+    <button class="ui-btn ui-btn--primary ui-btn--medium error-retry" bindtap="loadTalents" hover-class="ui-btn--pressed">重新加载</button>
+  </view>
+
+  <view wx:elif="{{talents.length}}" class="talent-list">
+    <view class="talent-card" wx:for="{{talents}}" wx:key="_id">
+      <view class="talent-top">
+        <view class="talent-avatar">{{item.initial}}</view>
+        <view class="talent-info">
+          <view class="talent-name">{{item.displayName}}</view>
+          <view class="talent-meta">{{item.school}} · {{item.major}}</view>
+          <view class="stage-summary">{{item.stageSummary}}</view>
+        </view>
+        <view class="talent-index">
+          <view class="talent-score">{{item.talentIndex || 0}}</view>
+          <view class="talent-score-label">指数</view>
+        </view>
+      </view>
+
+      <view class="tag-row">
+        <view class="skill-tag" wx:for="{{item.skillTags}}" wx:for-item="tag" wx:key="*this">{{tag}}</view>
+      </view>
+
+      <view class="stage-dots">
+        <view
+          class="stage-dot {{stage.status}}"
+          wx:for="{{item.stageStatuses}}"
+          wx:for-item="stage"
+          wx:key="*this"
+        ></view>
+      </view>
+
+      <view class="talent-actions">
+        <button class="ui-btn ui-btn--outline ui-btn--small ui-btn--block plain-btn" data-uid="{{item._id}}" bindtap="viewArchive" hover-class="ui-btn--pressed">查看档案</button>
+        <button class="ui-btn ui-btn--outline ui-btn--small ui-btn--block plain-btn" data-uid="{{item._id}}" bindtap="openCert" hover-class="ui-btn--pressed">颁发认证</button>
+        <button class="ui-btn ui-btn--secondary ui-btn--small ui-btn--block plain-btn" data-uid="{{item._id}}" bindtap="openInvite" hover-class="ui-btn--pressed">发邀约</button>
+        <button class="ui-btn ui-btn--primary ui-btn--small ui-btn--block primary-btn" data-uid="{{item._id}}" bindtap="openEval" hover-class="ui-btn--pressed">评价</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-state">暂时没有符合条件的人才</view>
+
+  <view wx:if="{{showEvalSheet}}" class="sheet-mask" catchtap="closeEval">
+    <scroll-view class="sheet" scroll-y enhanced show-scrollbar="{{false}}" catchtap="noop">
+      <view class="sheet-title">评价 {{selectedTalent.name}}</view>
+      <view class="field-label">企业导师</view>
+      <input class="sheet-input" maxlength="30" value="{{evalMentor}}" placeholder="如：李经理" bindinput="onEvalMentorInput" />
+      <view class="field-label">评价内容</view>
+      <textarea class="sheet-textarea" maxlength="500" value="{{evalContent}}" placeholder="从学习能力、项目交付、协作意识等方面评价" bindinput="onEvalContentInput"></textarea>
+      <view class="field-counter">{{evalContent.length}} / 500</view>
+      <view class="score-row">
+        <text>综合评分</text>
+        <text class="score-value">{{evalScore}}</text>
+      </view>
+      <slider min="0" max="100" value="{{evalScore}}" activeColor="#2b5cff" bindchange="onEvalScoreChange" />
+      <button class="ui-btn ui-btn--primary ui-btn--block sheet-submit" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitEval" hover-class="ui-btn--pressed">提交评价并生成校验记录</button>
+      <button class="ui-btn ui-btn--ghost ui-btn--medium ui-btn--block sheet-cancel" bindtap="closeEval" hover-class="ui-btn--pressed">取消</button>
+    </scroll-view>
+  </view>
+
+  <view wx:if="{{showCertSheet}}" class="sheet-mask" catchtap="closeCert">
+    <scroll-view class="sheet" scroll-y enhanced show-scrollbar="{{false}}" catchtap="noop">
+      <view class="sheet-title">为 {{selectedTalent.name}} 颁发认证</view>
+      <view class="sheet-notice">认证会写入学生数字档案，并生成不可随意改动的内容哈希。</view>
+      <view class="field-label">认证名称</view>
+      <input class="sheet-input" maxlength="80" value="{{certName}}" placeholder="如：工业机器人应用能力认证" bindinput="onCertNameInput" />
+      <view class="field-label">认证等级</view>
+      <picker range="{{['初级', '中级', '高级']}}" bindchange="onCertLevelChange">
+        <view class="picker-value" hover-class="ui-pressable--pressed">{{certLevel}}</view>
+      </picker>
+      <view class="field-label">证书编号（选填）</view>
+      <input class="sheet-input" maxlength="50" value="{{certSerialNo}}" placeholder="不填写将自动生成" bindinput="onCertSerialInput" />
+      <button class="ui-btn ui-btn--primary ui-btn--block sheet-submit" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitCert" hover-class="ui-btn--pressed">确认签发并生成哈希</button>
+      <button class="ui-btn ui-btn--ghost ui-btn--medium ui-btn--block sheet-cancel" bindtap="closeCert" hover-class="ui-btn--pressed">取消</button>
+    </scroll-view>
+  </view>
+
+  <view wx:if="{{showInviteSheet}}" class="sheet-mask" catchtap="closeInvite">
+    <scroll-view class="sheet" scroll-y enhanced show-scrollbar="{{false}}" catchtap="noop">
+      <view class="sheet-title">邀约 {{selectedTalent.name}}</view>
+      <view class="field-label">邀约类型</view>
+      <picker range="{{['面试', '实习']}}" bindchange="onInviteTypeChange">
+        <view class="picker-value" hover-class="ui-pressable--pressed">{{inviteType}}</view>
+      </picker>
+      <view class="field-label">附言</view>
+      <textarea class="sheet-textarea" maxlength="300" value="{{inviteMessage}}" placeholder="可以写面试时间、实习方向或联系方式" bindinput="onInviteMessageInput"></textarea>
+      <view class="field-counter">{{inviteMessage.length}} / 300</view>
+      <button class="ui-btn ui-btn--primary ui-btn--block sheet-submit" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitInvite" hover-class="ui-btn--pressed">发送邀约</button>
+      <button class="ui-btn ui-btn--ghost ui-btn--medium ui-btn--block sheet-cancel" bindtap="closeInvite" hover-class="ui-btn--pressed">取消</button>
+    </scroll-view>
+  </view>
+
+  <view wx:if="{{showJobSheet}}" class="sheet-mask" catchtap="closeJob">
+    <scroll-view class="sheet" scroll-y enhanced show-scrollbar="{{false}}" catchtap="noop">
+      <view class="sheet-title">发布岗位</view>
+      <view class="field-label">岗位名称</view>
+      <input class="sheet-input" maxlength="40" value="{{jobTitle}}" placeholder="如：AI 应用实习生" bindinput="onJobTitleInput" />
+      <view class="field-label">岗位类型</view>
+      <picker range="{{['实训', '实习', '正式岗位']}}" bindchange="onJobTypeChange">
+        <view class="picker-value" hover-class="ui-pressable--pressed">{{jobType}}</view>
+      </picker>
+      <view class="field-label">工作地点</view>
+      <input class="sheet-input" maxlength="80" value="{{jobLocation}}" placeholder="如：苏州 / 远程" bindinput="onJobLocationInput" />
+      <view class="field-label">岗位说明</view>
+      <textarea class="sheet-textarea" maxlength="600" value="{{jobDesc}}" placeholder="写清任务内容、技能要求和培养方向" bindinput="onJobDescInput"></textarea>
+      <view class="field-counter">{{jobDesc.length}} / 600</view>
+      <button class="ui-btn ui-btn--primary ui-btn--block sheet-submit" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitJob" hover-class="ui-btn--pressed">发布岗位</button>
+      <button class="ui-btn ui-btn--ghost ui-btn--medium ui-btn--block sheet-cancel" bindtap="closeJob" hover-class="ui-btn--pressed">取消</button>
+    </scroll-view>
+  </view>
+</view>

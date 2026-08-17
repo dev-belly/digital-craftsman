@@ -1,0 +1,180 @@
+<view class="register-page">
+  <view class="register-hero">
+    <view class="hero-badge">云端注册</view>
+    <view class="hero-title">创建数字工匠账号</view>
+    <view class="hero-desc">注册资料经云函数校验后保存到微信云开发；密码只保存加盐哈希，不会只留在当前手机或电脑。</view>
+  </view>
+
+  <view class="register-card">
+    <view class="role-switch ui-segmented">
+      <view
+        class="role-option ui-segmented__item {{role === 'student' ? 'ui-segmented__item--active' : ''}} {{loading ? 'role-option--disabled' : ''}}"
+        data-role="student"
+        bindtap="switchRole"
+        hover-class="ui-segmented__item--pressed"
+      >学生注册</view>
+      <view
+        class="role-option ui-segmented__item {{role === 'enterprise' ? 'ui-segmented__item--active' : ''}} {{loading ? 'role-option--disabled' : ''}}"
+        data-role="enterprise"
+        bindtap="switchRole"
+        hover-class="ui-segmented__item--pressed"
+      >企业注册</view>
+    </view>
+
+    <view class="form-title">{{role === 'enterprise' ? '填写企业注册资料' : '填写学生注册资料'}}</view>
+    <view class="form-desc">
+      {{role === 'enterprise' ? '当前体验版注册成功即可登录，企业账号使用账号密码登录' : '注册成功后使用账号密码登录并进入个人档案'}}
+    </view>
+
+    <view class="binding-notice">
+      注册成功后账号保存在云端；同一账号可在多个微信登录。
+    </view>
+
+    <view class="field-label">{{role === 'enterprise' ? '企业登录账号' : '学生登录账号'}}</view>
+    <view class="input-shell">
+      <input
+        class="form-input"
+        data-field="account"
+        value="{{account}}"
+        maxlength="20"
+        disabled="{{loading}}"
+        placeholder="6—20 位字母、数字、_ 或 -"
+        bindinput="onInput"
+      />
+    </view>
+
+    <block wx:if="{{role === 'student'}}">
+      <view class="field-label">真实姓名</view>
+      <view class="input-shell">
+        <input class="form-input" data-field="name" value="{{name}}" maxlength="30" disabled="{{loading}}" placeholder="请输入姓名" bindinput="onInput" />
+      </view>
+      <view class="field-label">学校</view>
+      <view class="input-shell">
+        <input class="form-input" data-field="school" value="{{school}}" maxlength="80" disabled="{{loading}}" placeholder="请输入学校全称" bindinput="onInput" />
+      </view>
+      <view class="field-label">专业</view>
+      <view class="input-shell">
+        <input class="form-input" data-field="major" value="{{major}}" maxlength="80" disabled="{{loading}}" placeholder="请输入专业名称" bindinput="onInput" />
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="field-label">企业名称</view>
+      <view class="input-shell">
+        <input class="form-input" data-field="companyName" value="{{companyName}}" maxlength="80" disabled="{{loading}}" placeholder="请输入企业全称" bindinput="onInput" />
+      </view>
+      <view class="field-label">联系人</view>
+      <view class="input-shell">
+        <input class="form-input" data-field="contact" value="{{contact}}" maxlength="30" disabled="{{loading}}" placeholder="请输入联系人姓名" bindinput="onInput" />
+      </view>
+      <view class="field-label">联系人手机号</view>
+      <view class="input-shell">
+        <input class="form-input" data-field="contactPhone" value="{{contactPhone}}" type="number" maxlength="11" disabled="{{loading}}" placeholder="请输入 11 位手机号" bindinput="onInput" />
+      </view>
+      <view class="field-label">统一社会信用代码 <text class="optional">（选填）</text></view>
+      <view class="input-shell">
+        <input class="form-input" data-field="creditCode" value="{{creditCode}}" maxlength="18" disabled="{{loading}}" placeholder="选填，用于企业身份信息" bindinput="onInput" />
+      </view>
+    </block>
+
+    <view class="field-label">设置密码</view>
+    <view class="input-shell">
+      <input
+        class="form-input"
+        data-field="password"
+        value="{{password}}"
+        password="{{!passwordVisible}}"
+        maxlength="32"
+        disabled="{{loading}}"
+        placeholder="8—32 位，须同时包含字母和数字"
+        bindinput="onInput"
+      />
+      <view class="visibility" bindtap="togglePassword" hover-class="ui-link--pressed">{{passwordVisible ? '隐藏' : '显示'}}</view>
+    </view>
+
+    <view class="field-label">确认密码</view>
+    <view class="input-shell">
+      <input
+        class="form-input"
+        data-field="confirmPassword"
+        value="{{confirmPassword}}"
+        password="{{!confirmVisible}}"
+        maxlength="32"
+        disabled="{{loading}}"
+        placeholder="请再次输入密码"
+        confirm-type="done"
+        bindinput="onInput"
+        bindconfirm="submitRegister"
+      />
+      <view class="visibility" bindtap="toggleConfirm" hover-class="ui-link--pressed">{{confirmVisible ? '隐藏' : '显示'}}</view>
+    </view>
+
+    <view class="cloud-tip">
+      <view class="cloud-icon">云</view>
+      <view>
+        <view class="cloud-title">云端安全保存</view>
+        <view class="cloud-text">密码经 PBKDF2 加盐哈希后写入云数据库，系统不保存明文密码。</view>
+      </view>
+    </view>
+
+    <view class="agreement">
+      <view class="agreement-check {{loading ? 'agreement-check--disabled' : ''}}" bindtap="toggleAgreement" hover-class="ui-link--pressed">
+        <view class="checkbox {{agreed ? 'checkbox--checked' : ''}}">{{agreed ? '✓' : ''}}</view>
+        <text>我已阅读并同意</text>
+      </view>
+      <view class="agreement-links">
+        <text class="link" catchtap="goAgreement" hover-class="ui-link--pressed">《用户协议》</text>
+        <text>与</text>
+        <text class="link" catchtap="goPrivacy" hover-class="ui-link--pressed">《隐私政策》</text>
+      </view>
+    </view>
+
+    <view
+      wx:if="{{registerErrorMessage}}"
+      id="register-error"
+      class="register-error register-error--{{registerErrorType}}"
+      role="alert"
+      aria-live="polite"
+    >
+      <view class="register-error__head">
+        <view class="register-error__icon">{{registerErrorIcon}}</view>
+        <view class="register-error__summary">
+          <view class="register-error__label">{{registerErrorLabel}}</view>
+          <view class="register-error__title">{{registerErrorTitle}}</view>
+        </view>
+      </view>
+      <view class="register-error__message">{{registerErrorMessage}}</view>
+      <view wx:if="{{registerErrorHint}}" class="register-error__hint">{{registerErrorHint}}</view>
+      <view class="register-error__actions">
+        <view
+          wx:if="{{registerErrorAction}}"
+          class="register-error__primary {{loading ? 'register-error__primary--disabled' : ''}}"
+          bindtap="handleRegisterErrorAction"
+          hover-class="register-error__primary--pressed"
+          role="button"
+        >{{registerErrorActionText}}</view>
+        <view
+          class="register-error__secondary"
+          bindtap="dismissRegisterError"
+          hover-class="ui-link--pressed"
+          role="button"
+        >{{registerErrorAction ? '继续修改资料' : '我知道了'}}</view>
+      </view>
+    </view>
+
+    <button
+      class="ui-btn ui-btn--primary ui-btn--block register-submit"
+      bindtap="submitRegister"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      hover-class="ui-btn--pressed"
+      hover-start-time="20"
+      hover-stay-time="90"
+    >
+      <text class="ui-button__label">{{loading ? '正在安全保存…' : (role === 'enterprise' ? '完成企业注册' : '完成注册')}}</text>
+      <text wx:if="{{!loading}}" class="ui-button__arrow">→</text>
+    </button>
+  </view>
+
+  <privacy-modal></privacy-modal>
+</view>

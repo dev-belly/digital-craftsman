@@ -1,0 +1,9 @@
+{
+  "name": "cleanupStages",
+  "version": "1.0.0",
+  "description": "清理非法 stage 数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

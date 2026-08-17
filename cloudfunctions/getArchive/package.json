@@ -1,0 +1,9 @@
+{
+  "name": "getArchive",
+  "version": "1.0.0",
+  "description": "根据 uid 聚合档案并校验私有会话",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

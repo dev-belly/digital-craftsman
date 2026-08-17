@@ -1,0 +1,9 @@
+{
+  "name": "manageJobApplication",
+  "version": "1.0.0",
+  "description": "企业接受或婉拒学生岗位申请",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

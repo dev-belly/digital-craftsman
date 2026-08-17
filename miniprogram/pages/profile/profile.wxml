@@ -1,0 +1,103 @@
+<view wx:if="{{loading}}" class="profile-state">
+  <view class="state-spinner"></view>
+  <view class="state-title">正在读取个人档案</view>
+</view>
+
+<view wx:elif="{{error}}" class="profile-state">
+  <view class="state-icon">!</view>
+  <view class="state-title">个人档案暂时没有加载出来</view>
+  <view class="state-desc">{{error}}</view>
+  <button class="ui-btn ui-btn--primary ui-btn--medium retry-btn" bindtap="load" hover-class="ui-btn--pressed">重新加载</button>
+</view>
+
+<view class="container" wx:else>
+  <view class="account-binding-card">
+    <view class="account-binding-icon">✓</view>
+    <view class="account-binding-copy">
+      <view class="account-binding-title">已使用账号密码登录</view>
+      <view class="account-binding-value">{{campusAccount || '当前账号'}}</view>
+    </view>
+    <view class="account-binding-badge">账号密码</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">基本信息</view>
+    <view class="field">
+      <text class="label">姓名</text>
+      <input class="input" maxlength="30" value="{{user.name}}" data-key="name" bindinput="onInput" placeholder="请输入姓名" />
+    </view>
+    <view class="field">
+      <text class="label">学校</text>
+      <input class="input" maxlength="80" value="{{user.school}}" data-key="school" bindinput="onInput" placeholder="请输入学校" />
+    </view>
+    <view class="field">
+      <text class="label">专业</text>
+      <input class="input" maxlength="80" value="{{user.major}}" data-key="major" bindinput="onInput" placeholder="请输入专业" />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">技能标签</view>
+    <view>
+      <text class="tag" wx:for="{{user.skillTags}}" wx:key="*this" data-index="{{index}}" bindtap="removeTag" hover-class="tag--pressed">{{item}} ✕</text>
+    </view>
+    <view class="tag-add">
+      <input class="input" maxlength="24" value="{{tagInput}}" bindinput="onTagInput" placeholder="输入技能后点添加" />
+      <button class="ui-btn ui-btn--secondary ui-btn--small ui-btn--compact add-btn" disabled="{{user.skillTags.length >= 12}}" bindtap="addTag" hover-class="ui-btn--pressed">添加</button>
+    </view>
+    <view class="text-sub" style="margin-top:12rpx">点击标签可删除</view>
+  </view>
+
+  <view class="card visibility-card">
+    <view class="visibility-row">
+      <view class="visibility-copy">
+        <view class="card-title visibility-title">公开档案码可查看</view>
+        <view class="visibility-desc">关闭后，别人即使保存过档案码，也不能继续打开你的公开档案。</view>
+      </view>
+      <switch
+        checked="{{user.profilePublic !== false}}"
+        color="#2457d6"
+        bindchange="onProfilePublicChange"
+      />
+    </view>
+    <view class="visibility-divider"></view>
+    <view class="visibility-row">
+      <view class="visibility-copy">
+        <view class="card-title visibility-title">企业人才池可见</view>
+        <view class="visibility-desc">开启后，已登录企业可在人才池中搜索到你的基本档案。</view>
+      </view>
+      <switch
+        checked="{{user.talentPoolVisible}}"
+        color="#2457d6"
+        bindchange="onTalentPoolVisibleChange"
+      />
+    </view>
+    <view class="visibility-tip">两项权限相互独立；关闭公开档案不会删除你的数据。</view>
+  </view>
+
+  <button class="ui-btn ui-btn--primary ui-btn--block save-btn" loading="{{saving}}" disabled="{{saving || !dirty}}" bindtap="save" hover-class="ui-btn--pressed">
+    <text>{{saving ? '正在保存' : dirty ? '保存档案' : '档案已是最新'}}</text>
+    <text class="ui-button__arrow">→</text>
+  </button>
+
+  <view class="card policy-card">
+    <view class="policy-row" bindtap="goChangePassword" hover-class="policy-row--pressed">
+      <view class="policy-copy">
+        <text>修改登录密码</text>
+        <text class="policy-hint">需验证当前密码</text>
+      </view>
+      <text class="policy-arrow">›</text>
+    </view>
+    <view class="policy-row" bindtap="goAgreement" hover-class="policy-row--pressed">
+      <text>用户协议</text>
+      <text class="policy-arrow">›</text>
+    </view>
+    <view class="policy-row" bindtap="goPrivacy" hover-class="policy-row--pressed">
+      <text>隐私政策</text>
+      <text class="policy-arrow">›</text>
+    </view>
+  </view>
+
+  <button class="ui-btn ui-btn--danger-soft ui-btn--block logout" bindtap="logout" hover-class="ui-btn--pressed">退出登录</button>
+  <view class="logout-tip">退出登录只清除本机会话，账号与密码保持不变</view>
+</view>

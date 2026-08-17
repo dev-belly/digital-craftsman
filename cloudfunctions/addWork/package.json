@@ -1,0 +1,9 @@
+{
+  "name": "addWork",
+  "version": "1.0.0",
+  "description": "新增作品:版权哈希+存证+重算人才指数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

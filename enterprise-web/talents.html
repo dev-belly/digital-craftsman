@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>数字工匠 · 人才池</title>
+  <script src="https://web-9gikcd7a8a9c1875-1259727843.tcloudbaseapp.com/cloudbase.js"></script>
+  <style>
+    :root { --primary: #2b5cff; --success: #17b26a; --gold: #f5a623; --bg: #f5f6fa; --sub: #8a8a8a; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: var(--bg); color: #1a1a1a; font-size: 15px; }
+    .head { background: linear-gradient(135deg, #2b5cff, #4b7bff); color: #fff; padding: 24px 20px 20px; }
+    .head h1 { font-size: 20px; }
+    .head p { font-size: 13px; opacity: .9; margin-top: 4px; }
+    .filters { display: flex; gap: 10px; margin-top: 16px; }
+    .filters input { flex: 1; border: none; border-radius: 10px; padding: 11px 14px; font-size: 14px; }
+    .filters button { border: none; border-radius: 10px; padding: 0 18px; background: #fff; color: var(--primary); font-weight: 600; font-size: 14px; }
+    .wrap { padding: 14px; }
+    .count { color: var(--sub); font-size: 13px; margin-bottom: 10px; }
+    .card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.04); }
+    .row1 { display: flex; align-items: center; }
+    .avatar { width: 44px; height: 44px; line-height: 44px; text-align: center; border-radius: 50%; background: #eaf0ff; color: var(--primary); font-weight: 700; font-size: 20px; }
+    .info { flex: 1; margin-left: 12px; }
+    .name { font-weight: 600; font-size: 16px; }
+    .meta { color: var(--sub); font-size: 12px; margin-top: 2px; }
+    .idx { text-align: center; }
+    .idx b { font-size: 22px; color: var(--gold); }
+    .idx span { display: block; font-size: 11px; color: var(--sub); }
+    .tags { margin: 12px 0; }
+    .tag { display: inline-block; background: #eaf0ff; color: var(--primary); padding: 3px 10px; border-radius: 20px; font-size: 12px; margin: 0 6px 6px 0; }
+    .acts { display: flex; gap: 10px; }
+    .acts button { flex: 1; border: none; border-radius: 10px; padding: 10px; font-size: 14px; }
+    .btn-view { background: #f0f2f7; color: #333; }
+    .btn-invite { background: var(--primary); color: #fff; }
+    .empty, .loading { text-align: center; padding: 60px 20px; color: var(--sub); }
+    /* 邀约弹层 */
+    .mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: flex-end; z-index: 100; }
+    .mask.show { display: flex; }
+    .sheet { width: 100%; background: #fff; border-radius: 22px 22px 0 0; padding: 22px 18px calc(22px + env(safe-area-inset-bottom)); }
+    .sheet h3 { text-align: center; margin-bottom: 16px; }
+    .sheet label { display: block; font-size: 13px; color: #555; margin: 12px 0 6px; }
+    .sheet input, .sheet textarea, .sheet select { width: 100%; border: 1px solid #e2e2e2; border-radius: 10px; padding: 11px; font-size: 15px; font-family: inherit; }
+    .sheet textarea { min-height: 70px; }
+    .sheet .btn { width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 22px; padding: 13px; font-size: 16px; margin-top: 18px; }
+    .cancel { text-align: center; color: var(--sub); margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <div class="head">
+    <h1>人才池</h1>
+    <p>按技能与人才指数检索,直接发起邀约</p>
+    <div class="filters">
+      <input id="kw" placeholder="技能关键词,如 AI" />
+      <input id="minIdx" type="number" placeholder="最低指数" style="max-width:100px" />
+      <button onclick="search()">检索</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="count" class="count"></div>
+    <div id="list"></div>
+  </div>
+
+  <!-- 邀约弹层 -->
+  <div class="mask" id="mask">
+    <div class="sheet">
+      <h3 id="invite-title">发起邀约</h3>
+      <label>企业名称 *</label>
+      <input id="i-company" placeholder="如:智联科技" />
+      <label>邀约类型</label>
+      <select id="i-type"><option>面试</option><option>实习</option></select>
+      <label>附言</label>
+      <textarea id="i-msg" placeholder="向候选人说点什么..."></textarea>
+      <button class="btn" id="i-btn" onclick="submitInvite()">发送邀约</button>
+      <div class="cancel" onclick="closeMask()">取消</div>
+    </div>
+  </div>
+
+  <script>
+    var ENV_ID = 'cloud1-d9g3gsolf1c9841d7';
+    // 档案详情页地址(用于"查看档案"),部署后按需修改
+    var ARCHIVE_URL = 'index.html';
+    var app, currentUid = '';
+
+    function esc(s) { return (s || '').replace(/</g, '&lt;'); }
+
+    async function init() {
+      try {
+        app = cloudbase.init({ env: ENV_ID });
+        await app.auth({ persistence: 'local' }).signInAnonymously();
+        search();
+      } catch (e) {
+        document.getElementById('list').innerHTML = '<div class="empty">初始化失败:' + (e.message || '检查环境ID') + '</div>';
+      }
+    }
+
+    async function search() {
+      var kw = document.getElementById('kw').value.trim();
+      var minIdx = document.getElementById('minIdx').value || 0;
+      document.getElementById('list').innerHTML = '<div class="loading">检索中...</div>';
+      try {
+        var res = await app.callFunction({ name: 'listTalents', data: { keyword: kw, minIndex: minIdx } });
+        if (res.result && res.result.code === 0) {
+          render(res.result.talents);
+        } else {
+          document.getElementById('list').innerHTML = '<div class="empty">检索失败</div>';
+        }
+      } catch (e) {
+        document.getElementById('list').innerHTML = '<div class="empty">出错:' + (e.message || '') + '</div>';
+      }
+    }
+
+    function render(talents) {
+      document.getElementById('count').textContent = '共 ' + talents.length + ' 位候选人';
+      if (!talents.length) { document.getElementById('list').innerHTML = '<div class="empty">没有符合条件的人才</div>'; return; }
+      document.getElementById('list').innerHTML = talents.map(function (t) {
+        var tags = (t.skillTags || []).slice(0, 6).map(function (s) { return '<span class="tag">' + esc(s) + '</span>'; }).join('');
+        return '<div class="card">' +
+          '<div class="row1">' +
+            '<div class="avatar">' + esc((t.name || '匠')[0]) + '</div>' +
+            '<div class="info"><div class="name">' + esc(t.name) + '</div>' +
+              '<div class="meta">' + esc(t.school || '') + ' · ' + esc(t.major || '') + '</div></div>' +
+            '<div class="idx"><b>' + (t.talentIndex || 0) + '</b><span>人才指数</span></div>' +
+          '</div>' +
+          '<div class="tags">' + (tags || '<span class="meta" style="color:#8a8a8a">暂无技能标签</span>') + '</div>' +
+          '<div class="acts">' +
+            '<button class="btn-view" onclick="viewArchive(\'' + t._id + '\')">查看档案</button>' +
+            '<button class="btn-invite" onclick="openInvite(\'' + t._id + '\',\'' + esc(t.name) + '\')">发起邀约</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function viewArchive(uid) { location.href = ARCHIVE_URL + '?uid=' + uid; }
+
+    function openInvite(uid, name) {
+      currentUid = uid;
+      document.getElementById('invite-title').textContent = '邀约 ' + name;
+      document.getElementById('mask').classList.add('show');
+    }
+    function closeMask() { document.getElementById('mask').classList.remove('show'); }
+
+    async function submitInvite() {
+      var company = document.getElementById('i-company').value.trim();
+      var type = document.getElementById('i-type').value;
+      var msg = document.getElementById('i-msg').value.trim();
+      if (!company) { alert('请填写企业名称'); return; }
+      var btn = document.getElementById('i-btn');
+      btn.disabled = true; btn.textContent = '发送中...';
+      try {
+        var res = await app.callFunction({ name: 'sendInvitation', data: { uid: currentUid, companyName: company, type: type, message: msg } });
+        if (res.result && res.result.code === 0) {
+          alert(res.result.msg);
+          closeMask();
+        } else {
+          alert((res.result && res.result.msg) || '发送失败');
+        }
+      } catch (e) {
+        alert('出错:' + (e.message || ''));
+      } finally {
+        btn.disabled = false; btn.textContent = '发送邀约';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "listTalents",
+  "version": "1.0.0",
+  "description": "人才池检索:按技能/指数筛选",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

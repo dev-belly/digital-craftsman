@@ -1,0 +1,16 @@
+<view class="privacy-mask" wx:if="{{show}}">
+  <view class="privacy-card">
+    <view class="privacy-title">用户隐私保护提示</view>
+    <scroll-view scroll-y class="privacy-body">
+      <text>感谢使用「数字工匠成长学习小屋」。使用前请阅读并同意</text>
+      <text class="privacy-link" catchtap="openPrivacy">《隐私政策》</text>
+      <text>与</text>
+      <text class="privacy-link" catchtap="openAgreement">《用户协议》</text>
+      <text>。我们将依据你的授权收集必要信息（如微信 OpenID、账号与档案资料），用于建立数字档案与人才对接服务。</text>
+    </scroll-view>
+    <view class="privacy-actions">
+      <button class="privacy-btn privacy-btn--ghost" catchtap="onDisagree">暂不同意</button>
+      <button class="privacy-btn privacy-btn--primary" catchtap="onAgree">同意并继续</button>
+    </view>
+  </view>
+</view>

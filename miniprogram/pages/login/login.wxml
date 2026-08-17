@@ -1,0 +1,108 @@
+<view class="login-page">
+  <view class="portal-header">
+    <view class="portal-brand">
+      <view class="portal-logo">匠</view>
+      <view>
+        <view class="portal-name">数字工匠</view>
+        <view class="portal-en">DIGITAL CRAFTSMAN PORTAL</view>
+      </view>
+    </view>
+    <view class="portal-copy">数字工匠成长服务平台</view>
+    <view class="portal-desc">云端身份认证 · 一人一档 · 账号密码登录</view>
+  </view>
+
+  <view class="login-card">
+    <view class="role-switch ui-segmented">
+      <view
+        class="role-option ui-segmented__item {{role === 'student' ? 'ui-segmented__item--active' : ''}}"
+        data-role="student"
+        bindtap="switchRole"
+        hover-class="ui-segmented__item--pressed"
+      >学生端</view>
+      <view
+        class="role-option ui-segmented__item {{role === 'enterprise' ? 'ui-segmented__item--active' : ''}}"
+        data-role="enterprise"
+        bindtap="switchRole"
+        hover-class="ui-segmented__item--pressed"
+      >企业端</view>
+    </view>
+
+    <view class="card-heading">
+      <view class="login-title">{{role === 'enterprise' ? '企业账号登录' : '校园账号登录'}}</view>
+      <view class="card-subtitle">{{role === 'enterprise' ? '企业可查看人才池、评价学生并发布岗位' : '登录后进入你的个人数字档案'}}</view>
+    </view>
+
+    <view class="field-label">{{role === 'enterprise' ? '企业账号' : '校园账号'}}</view>
+    <view class="input-shell">
+      <view class="input-icon">号</view>
+      <input
+        class="login-input"
+        value="{{account}}"
+        maxlength="20"
+        placeholder="{{role === 'enterprise' ? '请输入公司 ID' : '请输入学号或校园账号'}}"
+        placeholder-class="input-placeholder"
+        bindinput="onAccountInput"
+      />
+    </view>
+
+    <view class="field-label field-label--password">登录密码</view>
+    <view class="input-shell">
+      <view class="input-icon">密</view>
+      <input
+        class="login-input"
+        value="{{password}}"
+        password="{{!passwordVisible}}"
+        maxlength="32"
+        placeholder="请输入密码"
+        placeholder-class="input-placeholder"
+        confirm-type="done"
+        bindinput="onPasswordInput"
+        bindconfirm="onLogin"
+      />
+      <view class="password-toggle" bindtap="togglePassword" hover-class="ui-link--pressed">{{passwordVisible ? '隐藏' : '显示'}}</view>
+    </view>
+
+    <view class="recovery-entry" bindtap="goRecover" hover-class="ui-link--pressed">
+      忘记账号或密码？
+    </view>
+
+    <view class="binding-tip">
+      <view class="binding-lock">✓</view>
+      <text>账号密码登录，同一账号可在多个微信使用</text>
+    </view>
+
+    <view class="agreement">
+      <view class="agreement-check" bindtap="toggleAgreement" hover-class="ui-link--pressed">
+        <view class="checkbox {{agreed ? 'checkbox--checked' : ''}}">{{agreed ? '✓' : ''}}</view>
+        <text>我已阅读并同意</text>
+      </view>
+      <view class="agreement-links">
+        <text class="link" catchtap="goAgreement" hover-class="ui-link--pressed">《用户协议》</text>
+        <text>与</text>
+        <text class="link" catchtap="goPrivacy" hover-class="ui-link--pressed">《隐私政策》</text>
+      </view>
+    </view>
+
+    <button
+      class="ui-btn ui-btn--primary ui-btn--block login-submit {{loading ? 'login-submit--loading' : ''}}"
+      bindtap="onLogin"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      hover-class="ui-btn--pressed"
+      hover-start-time="20"
+      hover-stay-time="90"
+    >
+      <text class="ui-button__label">{{role === 'enterprise' ? '登录企业工作台' : '登录我的档案'}}</text>
+      <text class="ui-button__arrow">→</text>
+    </button>
+
+    <view class="register-entry">
+      <text>还没有{{role === 'enterprise' ? '企业' : '学生'}}账号？</text>
+      <text class="register-link" bindtap="goRegister" hover-class="ui-link--pressed">立即注册</text>
+    </view>
+  </view>
+
+  <view class="security-footer">账号与档案保存在微信云开发 · 密码仅保存加盐哈希 · 同一账号可在多个微信登录</view>
+
+  <privacy-modal></privacy-modal>
+</view>

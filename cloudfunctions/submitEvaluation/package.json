@@ -1,0 +1,9 @@
+{
+  "name": "submitEvaluation",
+  "version": "1.0.0",
+  "description": "企业提交评价:签名+存证+重算人才指数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

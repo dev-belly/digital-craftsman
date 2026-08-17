@@ -1,0 +1,253 @@
+page {
+  background: #f5f7fb;
+}
+
+.login-page {
+  min-height: 100vh;
+  padding: calc(env(safe-area-inset-top) + 42rpx) 36rpx 48rpx;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 96% 2%, rgba(117, 165, 255, 0.28), transparent 34%),
+    linear-gradient(180deg, #173f91 0%, #2862ca 31%, #f5f7fb 31%, #f5f7fb 100%);
+}
+
+.portal-header {
+  padding: 10rpx 10rpx 38rpx;
+  color: #fff;
+}
+
+.portal-brand {
+  display: flex;
+  align-items: center;
+}
+
+.portal-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70rpx;
+  height: 70rpx;
+  margin-right: 20rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.45);
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.portal-name {
+  font-size: 35rpx;
+  font-weight: 700;
+  letter-spacing: 3rpx;
+}
+
+.portal-en {
+  margin-top: 4rpx;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 17rpx;
+  letter-spacing: 2rpx;
+}
+
+.portal-copy {
+  margin-top: 34rpx;
+  font-size: 39rpx;
+  font-weight: 700;
+}
+
+.portal-desc {
+  margin-top: 12rpx;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 22rpx;
+}
+
+.login-card {
+  padding: 34rpx 32rpx 32rpx;
+  border: 1rpx solid rgba(218, 226, 239, 0.8);
+  border-radius: 26rpx;
+  background: #fff;
+  box-shadow: 0 16rpx 44rpx rgba(23, 46, 89, 0.11);
+}
+
+.role-switch {
+  margin-bottom: 28rpx;
+}
+
+.role-option {
+  box-sizing: border-box;
+}
+
+.card-heading {
+  padding-bottom: 26rpx;
+  border-bottom: 1rpx solid #eef1f5;
+}
+
+.login-title {
+  color: #17233d;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.card-subtitle {
+  margin-top: 10rpx;
+  color: #8a96a8;
+  font-size: 22rpx;
+}
+
+.field-label {
+  margin: 27rpx 0 11rpx;
+  color: #34425a;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.field-label--password {
+  margin-top: 24rpx;
+}
+
+.input-shell {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 22rpx;
+  border: 1rpx solid #dfe5ee;
+  border-radius: 16rpx;
+  background: #f8fafc;
+  box-sizing: border-box;
+}
+
+.input-icon {
+  flex: none;
+  width: 42rpx;
+  height: 42rpx;
+  line-height: 42rpx;
+  margin-right: 16rpx;
+  border-radius: 50%;
+  background: #edf3ff;
+  color: var(--brand-600);
+  text-align: center;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.login-input {
+  flex: 1;
+  min-width: 0;
+  height: 84rpx;
+  color: #1d2a40;
+  font-size: 27rpx;
+}
+
+.input-placeholder {
+  color: #a7b0be;
+}
+
+.password-toggle {
+  flex: none;
+  padding: 16rpx 0 16rpx 18rpx;
+  color: var(--brand-600);
+  font-size: 22rpx;
+}
+
+.recovery-entry {
+  display: flex;
+  justify-content: flex-end;
+  padding: 17rpx 2rpx 5rpx;
+  color: var(--brand-600);
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.binding-tip {
+  display: flex;
+  align-items: center;
+  padding: 17rpx 18rpx;
+  margin-top: 22rpx;
+  border: 1rpx solid #dde9fb;
+  border-radius: 14rpx;
+  background: #f2f6fd;
+  color: #526886;
+  font-size: 22rpx;
+}
+
+.binding-lock {
+  width: 31rpx;
+  height: 31rpx;
+  line-height: 31rpx;
+  margin-right: 11rpx;
+  border-radius: 50%;
+  background: var(--brand-600);
+  color: #fff;
+  text-align: center;
+  font-size: 18rpx;
+}
+
+.login-submit {
+  margin-top: 22rpx;
+}
+
+.login-submit--loading {
+  opacity: 0.72;
+}
+
+.register-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20rpx;
+  color: #7b879a;
+  font-size: 23rpx;
+}
+
+.register-link {
+  padding: 10rpx 8rpx;
+  color: var(--brand-600);
+  font-weight: 600;
+}
+
+.agreement {
+  margin-top: 24rpx;
+  color: #8490a3;
+  font-size: 21rpx;
+  text-align: center;
+}
+
+.agreement-check,
+.agreement-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agreement-links {
+  margin-top: 8rpx;
+  gap: 5rpx;
+}
+
+.checkbox {
+  width: 30rpx;
+  height: 30rpx;
+  line-height: 27rpx;
+  margin-right: 10rpx;
+  border: 2rpx solid #aeb7c7;
+  border-radius: 7rpx;
+  box-sizing: border-box;
+  color: #fff;
+  text-align: center;
+  font-size: 19rpx;
+}
+
+.checkbox--checked {
+  border-color: var(--brand-600);
+  background: var(--brand-600);
+}
+
+.link {
+  color: var(--brand-600);
+}
+
+.security-footer {
+  margin-top: 28rpx;
+  color: #8994a6;
+  text-align: center;
+  font-size: 20rpx;
+}

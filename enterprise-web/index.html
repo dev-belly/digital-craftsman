@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>数字工匠 · 企业端</title>
+  <!-- CloudBase Web SDK(匿名登录 → 调云函数)-->
+  <script src="https://web-9gikcd7a8a9c1875-1259727843.tcloudbaseapp.com/cloudbase.js"></script>
+  <style>
+    :root {
+      --primary: #2b5cff;
+      --success: #17b26a;
+      --gold: #f5a623;
+      --bg: #f5f6fa;
+      --sub: #8a8a8a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: var(--bg); color: #1a1a1a; font-size: 15px; padding-bottom: 40px;
+    }
+    .head {
+      background: linear-gradient(135deg, #2b5cff, #4b7bff);
+      color: #fff; padding: 28px 20px; text-align: center;
+    }
+    .head .avatar {
+      width: 60px; height: 60px; line-height: 60px; border-radius: 50%;
+      background: rgba(255,255,255,.25); font-size: 28px; font-weight: 700; margin: 0 auto 12px;
+    }
+    .head .name { font-size: 20px; font-weight: 700; }
+    .head .meta { font-size: 13px; opacity: .9; margin-top: 4px; }
+    .head .idx { margin-top: 10px; font-size: 13px; opacity: .9; }
+    .head .idx b { font-size: 22px; }
+    .wrap { padding: 16px; }
+    .card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.04); }
+    .card h3 { font-size: 15px; margin-bottom: 12px; padding-left: 10px; border-left: 4px solid var(--primary); }
+    .tag { display: inline-block; background: #eaf0ff; color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 12px; margin: 0 8px 8px 0; }
+    .row { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .row:last-child { border: none; }
+    .row .t { font-weight: 600; }
+    .row .s { color: var(--sub); font-size: 12px; margin-top: 3px; }
+    .badge { display: inline-flex; align-items: center; background: rgba(23,178,106,.1); color: var(--success); padding: 3px 10px; border-radius: 6px; font-size: 12px; }
+    label { display: block; font-size: 13px; color: #555; margin: 14px 0 6px; }
+    input, textarea {
+      width: 100%; border: 1px solid #e2e2e2; border-radius: 10px; padding: 12px; font-size: 15px; font-family: inherit;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .score-box { display: flex; align-items: center; gap: 12px; }
+    .score-box input[type=range] { flex: 1; }
+    .score-val { font-size: 22px; font-weight: 700; color: var(--gold); width: 44px; text-align: right; }
+    .btn {
+      width: 100%; background: var(--primary); color: #fff; border: none;
+      border-radius: 24px; padding: 14px; font-size: 16px; margin-top: 20px;
+    }
+    .btn:disabled { opacity: .5; }
+    .loading, .error { text-align: center; padding: 80px 20px; color: var(--sub); }
+    .result { text-align: center; padding: 40px 20px; }
+    .result .ok { width: 64px; height: 64px; line-height: 64px; border-radius: 50%; background: var(--success); color: #fff; font-size: 34px; margin: 0 auto 16px; }
+    .result .hash { font-size: 11px; color: #b0b0b0; word-break: break-all; margin-top: 16px; background: #f7f7f7; padding: 10px; border-radius: 8px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="loading" class="loading">档案加载中...</div>
+  <div id="error" class="error hidden"></div>
+
+  <div id="app" class="hidden">
+    <div class="head">
+      <div class="avatar" id="avatar">匠</div>
+      <div class="name" id="uname"></div>
+      <div class="meta" id="umeta"></div>
+      <div class="idx">人才指数 <b id="uidx">0</b></div>
+    </div>
+
+    <div class="wrap">
+      <div class="card">
+        <h3>技能档案</h3>
+        <div id="skills"></div>
+      </div>
+
+      <div class="card">
+        <h3>认证记录</h3>
+        <div id="certs"></div>
+      </div>
+
+      <div class="card">
+        <h3>作品集</h3>
+        <div id="works"></div>
+      </div>
+
+      <div class="card">
+        <h3>企业评价</h3>
+        <div id="evals"></div>
+      </div>
+
+      <!-- 打评价 -->
+      <div class="card" id="form-card">
+        <h3>我要评价 TA</h3>
+        <label>企业名称 *</label>
+        <input id="f-company" placeholder="如:智联科技" />
+        <label>导师姓名</label>
+        <input id="f-mentor" placeholder="如:李工" />
+        <label>评价内容 *</label>
+        <textarea id="f-content" placeholder="从操作规范、学习能力、交付质量等方面评价..."></textarea>
+        <label>综合评分</label>
+        <div class="score-box">
+          <input id="f-score" type="range" min="0" max="100" value="85" oninput="document.getElementById('score-val').textContent=this.value" />
+          <span class="score-val" id="score-val">85</span>
+        </div>
+        <button class="btn" id="submitBtn" onclick="submitEval()">提交评价并签名存证</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提交成功 -->
+  <div id="success" class="result hidden">
+    <div class="ok">✓</div>
+    <div style="font-size:18px;font-weight:700">评价已提交</div>
+    <div style="color:var(--sub);margin-top:8px">已完成平台数字签名与哈希存证</div>
+    <div class="hash" id="result-hash"></div>
+    <button class="btn" onclick="location.reload()">返回档案</button>
+  </div>
+
+  <script>
+    // ===== 配置:填你的云开发环境 ID =====
+    var ENV_ID = 'cloud1-d9g3gsolf1c9841d7';
+
+    var app, uid;
+
+    // 从 URL 取 uid: ?uid=xxx
+    function getUid() {
+      var m = location.search.match(/[?&]uid=([^&]+)/);
+      return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    function esc(s) { return (s || '').replace(/</g, '&lt;'); }
+
+    async function init() {
+      uid = getUid();
+      if (!uid) { showError('缺少档案参数(uid),请通过扫码进入'); return; }
+
+      try {
+        app = cloudbase.init({ env: ENV_ID });
+        var auth = app.auth({ persistence: 'local' });
+        // 匿名登录:企业无需注册即可查看与评价
+        await auth.signInAnonymously();
+
+        var res = await app.callFunction({ name: 'getArchive', data: { uid: uid } });
+        if (res.result && res.result.code === 0) {
+          render(res.result.data);
+        } else {
+          showError('未找到该档案');
+        }
+      } catch (e) {
+        console.error(e);
+        showError('加载失败:' + (e.message || '请检查环境 ID 与云函数部署'));
+      }
+    }
+
+    function render(d) {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+
+      var u = d.user;
+      document.getElementById('avatar').textContent = (u.name || '匠')[0];
+      document.getElementById('uname').textContent = u.name || '未命名工匠';
+      document.getElementById('umeta').textContent = (u.school || '') + ' · ' + (u.major || '');
+      document.getElementById('uidx').textContent = u.talentIndex || 0;
+
+      // 技能
+      var skills = (u.skillTags || []).map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('');
+      document.getElementById('skills').innerHTML = skills || '<div style="color:#8a8a8a">暂无</div>';
+
+      // 认证
+      document.getElementById('certs').innerHTML = d.certifications.length
+        ? d.certifications.map(function (c) {
+            return '<div class="row"><div class="t">' + esc(c.certName) + '</div><div class="s">' + esc(c.issuer) + ' · ' + esc(c.level) + '</div></div>';
+          }).join('')
+        : '<div style="color:#8a8a8a">暂无</div>';
+
+      // 作品
+      document.getElementById('works').innerHTML = d.works.length
+        ? d.works.map(function (w) {
+            return '<div class="row"><div class="t">' + esc(w.title) + '</div><div class="s">' + esc(w.desc) + '</div></div>';
+          }).join('')
+        : '<div style="color:#8a8a8a">暂无</div>';
+
+      // 评价
+      document.getElementById('evals').innerHTML = d.evaluations.length
+        ? d.evaluations.map(function (e) {
+            return '<div class="row"><div class="t">' + esc(e.companyName) +
+              ' <span style="color:#f5a623">' + e.score + '分</span></div>' +
+              '<div class="s">' + esc(e.content) + '</div>' +
+              '<div style="margin-top:6px"><span class="badge">✓ 数字签名 · 已存证</span></div></div>';
+          }).join('')
+        : '<div style="color:#8a8a8a">暂无</div>';
+    }
+
+    async function submitEval() {
+      var company = document.getElementById('f-company').value.trim();
+      var content = document.getElementById('f-content').value.trim();
+      var mentor = document.getElementById('f-mentor').value.trim();
+      var score = document.getElementById('f-score').value;
+
+      if (!company) { alert('请填写企业名称'); return; }
+      if (!content) { alert('请填写评价内容'); return; }
+
+      var btn = document.getElementById('submitBtn');
+      btn.disabled = true; btn.textContent = '提交中...';
+
+      try {
+        var res = await app.callFunction({
+          name: 'submitEvaluation',
+          data: { uid: uid, companyName: company, mentorName: mentor, content: content, score: score },
+        });
+        if (res.result && res.result.code === 0) {
+          document.getElementById('app').classList.add('hidden');
+          document.getElementById('success').classList.remove('hidden');
+          document.getElementById('result-hash').textContent =
+            '证据哈希:' + res.result.evidenceHash + '\n数字签名:' + res.result.signature;
+        } else {
+          alert(res.result.msg || '提交失败');
+          btn.disabled = false; btn.textContent = '提交评价并签名存证';
+        }
+      } catch (e) {
+        alert('提交出错:' + (e.message || ''));
+        btn.disabled = false; btn.textContent = '提交评价并签名存证';
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('loading').classList.add('hidden');
+      var el = document.getElementById('error');
+      el.classList.remove('hidden');
+      el.textContent = msg;
+    }
+
+    init();
+  </script>
+</body>
+</html>

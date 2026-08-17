@@ -1,0 +1,9 @@
+{
+  "name": "issueCertification",
+  "version": "1.0.0",
+  "description": "企业向学生签发技能认证并生成哈希校验记录",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

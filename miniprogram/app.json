@@ -1,0 +1,58 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/register/register",
+    "pages/recover/recover",
+    "pages/password/password",
+    "pages/enterprise/home/home",
+    "pages/home/home",
+    "pages/archive/archive",
+    "pages/works/works",
+    "pages/certs/certs",
+    "pages/evaluations/evaluations",
+    "pages/profile/profile",
+    "pages/privacy/privacy"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#2457d6",
+    "navigationBarTitleText": "数字工匠",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f7fb"
+  },
+  "tabBar": {
+    "color": "#7b8494",
+    "selectedColor": "#2457d6",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "assets/tabbar/home.png",
+        "selectedIconPath": "assets/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/works/works",
+        "text": "作品",
+        "iconPath": "assets/tabbar/works.png",
+        "selectedIconPath": "assets/tabbar/works-active.png"
+      },
+      {
+        "pagePath": "pages/evaluations/evaluations",
+        "text": "评价",
+        "iconPath": "assets/tabbar/evaluations.png",
+        "selectedIconPath": "assets/tabbar/evaluations-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/tabbar/profile.png",
+        "selectedIconPath": "assets/tabbar/profile-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

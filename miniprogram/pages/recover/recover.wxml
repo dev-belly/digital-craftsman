@@ -1,0 +1,187 @@
+<view class="recover-page">
+  <view class="recover-hero">
+    <view class="hero-mark">钥</view>
+    <view class="hero-title">找回账号与密码</view>
+    <view class="hero-desc">输入账号，或用当前微信查询已绑定记录，再安全重置密码</view>
+  </view>
+
+  <view class="recover-card">
+    <view class="role-switch ui-segmented">
+      <view
+        class="ui-segmented__item {{role === 'student' ? 'ui-segmented__item--active' : ''}}"
+        data-role="student"
+        bindtap="switchRole"
+        hover-class="ui-segmented__item--pressed"
+      >学生账号</view>
+      <view
+        class="ui-segmented__item {{role === 'enterprise' ? 'ui-segmented__item--active' : ''}}"
+        data-role="enterprise"
+        bindtap="switchRole"
+        hover-class="ui-segmented__item--pressed"
+      >企业账号</view>
+    </view>
+
+    <view class="security-tip">
+      <view class="security-icon">✓</view>
+      <view>
+        <view class="security-title">两种安全找回方式</view>
+        <view class="security-copy">记得账号可直接验证；忘记账号可查询当前微信已安全绑定的{{role === 'enterprise' ? '企业' : '学生'}}账号。</view>
+      </view>
+    </view>
+
+    <view class="field-label">账号</view>
+    <view class="input-shell">
+      <view class="input-icon">号</view>
+      <input
+        class="recover-input"
+        value="{{accountInput}}"
+        maxlength="20"
+        disabled="{{findAccountsLoading || lookupLoading || resetLoading}}"
+        placeholder="请输入你要找回的账号"
+        placeholder-class="input-placeholder"
+        confirm-type="search"
+        bindinput="onAccountInput"
+        bindconfirm="lookupAccount"
+      />
+    </view>
+
+    <block wx:if="{{!bindingFound}}">
+      <view
+        class="account-find-trigger {{findAccountsLoading || lookupLoading || resetLoading ? 'account-find-trigger--disabled' : ''}}"
+        bindtap="findAccounts"
+        hover-class="account-find-trigger--pressed"
+        role="button"
+        aria-label="用当前微信查询已绑定账号"
+      >
+        <view wx:if="{{findAccountsLoading}}" class="account-find-spinner"></view>
+        <view wx:else class="account-find-icon">微</view>
+        <view class="account-find-copy">
+          <view class="account-find-title">{{findAccountsLoading ? '正在查询当前微信…' : '忘记账号？用当前微信查询'}}</view>
+          <view class="account-find-desc">只显示当前微信已安全绑定的{{role === 'enterprise' ? '企业' : '学生'}}账号</view>
+        </view>
+        <view class="account-find-arrow">›</view>
+      </view>
+
+      <view
+        wx:if="{{accountFinderState}}"
+        class="account-finder account-finder--{{accountFinderState}}"
+      >
+        <view class="account-finder-head">
+          <view class="account-finder-symbol">{{accountFinderState === 'results' ? '✓' : (accountFinderState === 'empty' ? '0' : '!')}}</view>
+          <view class="account-finder-copy">
+            <view class="account-finder-title">
+              {{accountFinderState === 'results' ? '请选择要找回的账号' : (accountFinderState === 'empty' ? '当前微信暂无账号' : '账号查询未完成')}}
+            </view>
+            <view class="account-finder-desc">{{accountFinderMessage}}</view>
+          </view>
+        </view>
+
+        <view wx:if="{{accountFinderState === 'results'}}" class="account-options">
+          <view
+            wx:for="{{foundAccounts}}"
+            wx:key="account"
+            class="account-option"
+            data-index="{{index}}"
+            bindtap="selectFoundAccount"
+            hover-class="account-option--pressed"
+            role="button"
+            aria-label="选择账号 {{item.account}}"
+          >
+            <view class="account-option-icon">{{role === 'enterprise' ? '企' : '学'}}</view>
+            <view class="account-option-copy">
+              <view class="account-option-value">{{item.account}}</view>
+              <view class="account-option-name">{{item.displayName || '已通过当前微信安全绑定'}}</view>
+            </view>
+            <view class="account-option-action">选择 <text>›</text></view>
+          </view>
+        </view>
+      </view>
+
+      <view class="lookup-state {{errorMessage ? 'lookup-state--error' : ''}}">
+        <view class="lookup-symbol">{{errorMessage ? '!' : '微'}}</view>
+        <view class="lookup-title">{{errorMessage ? (lookupErrorTitle || '账号查询失败') : '先确认微信绑定记录'}}</view>
+        <view class="lookup-desc">{{errorMessage || '输入上方账号并点击按钮，系统会校验当前微信是否登录过该账号。'}}</view>
+      </view>
+      <button
+        class="ui-btn ui-btn--primary ui-btn--block lookup-button"
+        bindtap="lookupAccount"
+        loading="{{lookupLoading}}"
+        disabled="{{lookupLoading || findAccountsLoading}}"
+        hover-class="ui-btn--pressed"
+      >
+        <text>{{lookupLoading ? '正在验证…' : '查询并验证账号'}}</text>
+      </button>
+    </block>
+
+    <block wx:else>
+      <view class="account-result">
+        <view class="result-label">已找回{{role === 'enterprise' ? '企业' : '学生'}}账号</view>
+        <view class="result-main">
+          <view class="account-copy">
+            <view class="account-value">{{account}}</view>
+            <view class="account-owner" wx:if="{{displayName}}">{{displayName}}</view>
+          </view>
+          <view class="copy-action" bindtap="copyAccount" hover-class="ui-link--pressed">复制账号</view>
+        </view>
+      </view>
+
+      <view class="section-title">设置一个新密码</view>
+      <view class="password-rule">8—32 位，必须同时包含字母和数字</view>
+
+      <view class="field-label">新密码</view>
+      <view class="input-shell">
+        <view class="input-icon">密</view>
+        <input
+          class="recover-input"
+          value="{{newPassword}}"
+          password="{{!passwordVisible}}"
+          maxlength="32"
+          placeholder="请输入新密码"
+          placeholder-class="input-placeholder"
+          bindinput="onNewPasswordInput"
+        />
+        <view class="password-toggle" bindtap="togglePassword" hover-class="ui-link--pressed">{{passwordVisible ? '隐藏' : '显示'}}</view>
+      </view>
+
+      <view class="field-label">确认新密码</view>
+      <view class="input-shell">
+        <view class="input-icon">验</view>
+        <input
+          class="recover-input"
+          value="{{confirmPassword}}"
+          password="{{!confirmPasswordVisible}}"
+          maxlength="32"
+          placeholder="请再次输入新密码"
+          placeholder-class="input-placeholder"
+          confirm-type="done"
+          bindinput="onConfirmPasswordInput"
+          bindconfirm="resetPassword"
+        />
+        <view class="password-toggle" bindtap="toggleConfirmPassword" hover-class="ui-link--pressed">{{confirmPasswordVisible ? '隐藏' : '显示'}}</view>
+      </view>
+
+      <view wx:if="{{resetErrorMessage}}" class="reset-error">
+        <view class="reset-error__icon">!</view>
+        <text>{{resetErrorMessage}}</text>
+      </view>
+
+      <button
+        class="ui-btn ui-btn--primary ui-btn--block reset-button"
+        bindtap="resetPassword"
+        loading="{{resetLoading}}"
+        disabled="{{resetLoading}}"
+        hover-class="ui-btn--pressed"
+      >
+        <text>{{resetLoading ? '正在安全重置…' : '确认重置密码'}}</text>
+      </button>
+    </block>
+
+    <view class="card-links">
+      <text class="card-link" bindtap="backToLogin" hover-class="ui-link--pressed">返回登录</text>
+      <view class="link-divider"></view>
+      <text class="card-link" bindtap="goPrivacy" hover-class="ui-link--pressed">隐私政策</text>
+    </view>
+  </view>
+
+  <view class="page-footer">重置后旧密码和旧登录状态会立即失效</view>
+</view>

@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "注册云端账号",
+  "navigationBarBackgroundColor": "#2457d6",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "privacy-modal": "/components/privacy-modal/privacy-modal"
+  }
+}

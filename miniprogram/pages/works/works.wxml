@@ -1,0 +1,128 @@
+<view class="container works-page">
+  <view class="portfolio-summary">
+    <view class="summary-copy">
+      <view class="summary-title">成长作品集</view>
+      <view class="summary-desc">每份作品都会生成内容哈希，用于后续完整性校验</view>
+    </view>
+    <view class="summary-count">{{works.length}}<text>件</text></view>
+  </view>
+
+  <view wx:if="{{loading}}" class="page-state">
+    <view class="state-spinner"></view>
+    <view class="state-title">正在同步作品记录</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="page-state">
+    <view class="state-icon">!</view>
+    <view class="state-title">作品暂时没有加载出来</view>
+    <view class="state-desc">{{error}}</view>
+    <button class="ui-btn ui-btn--primary ui-btn--medium retry-btn" bindtap="load" hover-class="ui-btn--pressed">重新加载</button>
+  </view>
+
+  <block wx:else>
+    <view class="card work-card" wx:for="{{works}}" wx:key="_id">
+      <image wx:if="{{item.coverUrl}}" class="cover" src="{{item.coverUrl}}" mode="aspectFill" />
+      <view wx:else class="cover-placeholder-card">
+        <view class="cover-letter">{{item.title[0] || '作'}}</view>
+        <view class="cover-caption">DIGITAL WORK</view>
+      </view>
+      <view class="work-body">
+        <view class="work-meta">{{item.createdLabel}}</view>
+        <view class="card-title">{{item.title}}</view>
+        <view wx:if="{{item.desc}}" class="text-sub work-desc">{{item.desc}}</view>
+        <view
+          wx:if="{{item.copyrightHash}}"
+          class="hash-line {{item.hashVisible ? 'hash-line--open' : ''}}"
+          data-index="{{index}}"
+          bindtap="toggleHash"
+          hover-class="hash-line--pressed"
+        >
+          <view class="hash-badge">
+            <view class="mini-lock">
+              <view class="mini-lock-shackle"></view>
+              <view class="mini-lock-body"></view>
+            </view>
+            <text>哈希记录</text>
+          </view>
+          <text class="hash-value">{{item.displayHash}}</text>
+          <text class="hash-arrow">{{item.hashVisible ? '⌃' : '⌄'}}</text>
+        </view>
+        <view
+          wx:if="{{item.hashVisible}}"
+          class="hash-detail"
+          data-index="{{index}}"
+          catchtap="copyHash"
+          hover-class="hash-detail--pressed"
+        >
+          <view class="hash-detail-label">作品信息哈希（哈希存证）</view>
+          <view class="hash-detail-value">{{item.copyrightHash}}</view>
+          <view class="hash-detail-copy">点击复制完整哈希</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!works.length}}" class="page-state empty-state">
+      <view class="empty-visual">作</view>
+      <view class="state-title">还没有作品记录</view>
+      <view class="state-desc">上传项目、设计或实践成果，建立第一份成长证据</view>
+    </view>
+  </block>
+
+  <button class="ui-btn ui-btn--primary ui-btn--block fab" bindtap="openForm" hover-class="ui-btn--pressed">
+    <text class="fab-plus">＋</text>
+    <text>上传新作品</text>
+  </button>
+</view>
+
+<view wx:if="{{showForm}}" class="mask" bindtap="closeForm">
+  <view class="sheet" catchtap="noop">
+    <view class="sheet-handle"></view>
+    <view class="sheet-title">上传作品</view>
+    <view class="sheet-subtitle">作品信息会生成 SHA-256 哈希记录，作为哈希存证保留</view>
+
+    <view class="cover-picker" bindtap="chooseCover" hover-class="ui-pressable--pressed">
+      <image wx:if="{{coverPath}}" class="cover-preview" src="{{coverPath}}" mode="aspectFill" />
+      <view wx:else class="cover-placeholder">
+        <view class="picker-plus">＋</view>
+        <view>选择封面图（可选）</view>
+      </view>
+      <view wx:if="{{uploading}}" class="upload-overlay">
+        <view class="upload-spinner"></view>
+        <text>正在上传封面</text>
+      </view>
+      <view wx:elif="{{coverFileId}}" class="upload-done">✓ 已上传</view>
+    </view>
+
+    <view class="field-label">作品标题 <text>*</text></view>
+    <input
+      class="f-input"
+      maxlength="80"
+      placeholder="例如：校园智能问答机器人"
+      value="{{title}}"
+      bindinput="onTitle"
+    />
+    <view class="field-label">作品描述</view>
+    <textarea
+      class="f-textarea"
+      maxlength="1000"
+      placeholder="介绍作品内容、你的贡献与收获"
+      value="{{desc}}"
+      bindinput="onDesc"
+    />
+    <view class="char-count">{{desc.length}} / 1000</view>
+
+    <button
+      class="ui-btn ui-btn--primary ui-btn--block"
+      loading="{{submitting}}"
+      disabled="{{submitting || uploading}}"
+      bindtap="submit"
+      hover-class="ui-btn--pressed"
+    >{{uploading ? '等待封面上传' : '提交并生成哈希记录'}}</button>
+    <button
+      class="ui-btn ui-btn--ghost ui-btn--medium ui-btn--block cancel"
+      disabled="{{submitting || uploading}}"
+      bindtap="closeForm"
+      hover-class="ui-btn--pressed"
+    >取消</button>
+  </view>
+</view>

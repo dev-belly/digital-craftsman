@@ -1,0 +1,266 @@
+page {
+  background: #f3f6fb;
+}
+
+.page-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26rpx 28rpx;
+  margin-bottom: 22rpx;
+  border: 1rpx solid rgba(226, 232, 240, 0.9);
+  border-radius: 22rpx;
+  background: linear-gradient(145deg, #fff 0%, #f5f8ff 100%);
+  box-shadow: 0 8rpx 26rpx rgba(29, 49, 82, 0.055);
+}
+
+.page-title {
+  color: var(--text-900);
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.page-desc {
+  max-width: 500rpx;
+  margin-top: 8rpx;
+  color: var(--text-500);
+  font-size: 21rpx;
+  line-height: 1.5;
+}
+
+.summary-count {
+  flex: none;
+  margin-left: 18rpx;
+  color: var(--brand-600);
+  font-size: 43rpx;
+  line-height: 1;
+  font-weight: 750;
+}
+
+.summary-count text {
+  margin-left: 4rpx;
+  color: var(--text-400);
+  font-size: 19rpx;
+  font-weight: 500;
+}
+
+.page-state {
+  min-height: 520rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 34rpx;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.state-spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border: 5rpx solid #dbe5f8;
+  border-top-color: var(--brand-600);
+  border-radius: 50%;
+  animation: state-spin 0.8s linear infinite;
+}
+
+.state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 23rpx;
+  background: #eaf0ff;
+  color: var(--brand-600);
+  font-size: 35rpx;
+  font-weight: 700;
+}
+
+.state-title {
+  margin-top: 22rpx;
+  color: var(--text-700);
+  font-size: 28rpx;
+  font-weight: 650;
+}
+
+.state-desc {
+  margin-top: 9rpx;
+  color: var(--text-400);
+  font-size: 22rpx;
+}
+
+.retry-btn {
+  min-width: 220rpx;
+  margin-top: 26rpx;
+}
+
+.cert-card {
+  padding: 28rpx;
+}
+
+.cert-head {
+  display: flex;
+  align-items: center;
+}
+
+.cert-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  background: var(--brand-50);
+  color: var(--brand-600);
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.cert-main {
+  flex: 1;
+  min-width: 0;
+  margin-left: 20rpx;
+}
+
+.cert-name {
+  overflow: hidden;
+  color: var(--text-900);
+  font-size: 29rpx;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cert-meta {
+  margin-top: 7rpx;
+  color: var(--text-500);
+  font-size: 22rpx;
+}
+
+.cert-status {
+  flex: none;
+  padding: 7rpx 14rpx;
+  border-radius: 999rpx;
+  background: #edf9f3;
+  color: var(--success-600);
+  font-size: 20rpx;
+  font-weight: 600;
+}
+
+.cert-proof {
+  display: flex;
+  align-items: center;
+  padding: 17rpx 18rpx;
+  margin-top: 24rpx;
+  border: 1rpx solid #dcece4;
+  border-radius: 14rpx;
+  background: #f5fbf8;
+  color: #47705f;
+  font-size: 21rpx;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.cert-proof--pressed {
+  opacity: 0.82;
+  background: #edf7f2;
+}
+
+.proof-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 9rpx;
+  border-radius: 50%;
+  background: var(--success-600);
+  color: #fff;
+  font-size: 17rpx;
+}
+
+.proof-divider {
+  width: 1rpx;
+  height: 20rpx;
+  margin: 0 16rpx;
+  background: #d2e4db;
+}
+
+.proof-action {
+  flex: none;
+  margin-left: auto;
+  padding-left: 12rpx;
+  color: var(--brand-600);
+  font-weight: 600;
+}
+
+.hash-detail {
+  padding: 18rpx 20rpx;
+  margin-top: 12rpx;
+  border: 1rpx solid #d8e4f7;
+  border-radius: 14rpx;
+  background: #f5f8fe;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.hash-detail--pressed {
+  opacity: 0.84;
+  background: #edf3fd;
+}
+
+.hash-detail-label {
+  color: #63738d;
+  font-size: 20rpx;
+}
+
+.hash-detail-value {
+  margin-top: 9rpx;
+  overflow-wrap: anywhere;
+  color: #344765;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 19rpx;
+  line-height: 1.55;
+}
+
+.hash-detail-copy {
+  margin-top: 8rpx;
+  color: var(--brand-600);
+  font-size: 19rpx;
+}
+
+.empty-state {
+  padding: 120rpx 20rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 86rpx;
+  height: 86rpx;
+  margin: 0 auto;
+  border-radius: 24rpx;
+  background: #eaf0f8;
+  color: #8090a5;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.empty-title {
+  margin-top: 22rpx;
+  color: var(--text-700);
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.empty-desc {
+  margin-top: 9rpx;
+  color: var(--text-400);
+  font-size: 22rpx;
+}
+
+@keyframes state-spin {
+  to { transform: rotate(360deg); }
+}

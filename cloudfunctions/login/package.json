@@ -1,0 +1,9 @@
+{
+  "name": "login",
+  "version": "1.0.0",
+  "description": "学生和企业账号登录（账号密码为主模型，同一账号可多微信登录、同一微信可多账号），签发短期会话",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

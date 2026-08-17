@@ -1,0 +1,9 @@
+{
+  "name": "initDB",
+  "version": "1.0.0",
+  "description": "初始化集合并可选写入演示数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
