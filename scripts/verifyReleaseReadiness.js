@@ -147,49 +147,6 @@ function hasHandlerDefinition(source, handler) {
   return shorthand.test(source) || property.test(source);
 }
 
-function findPolicyConflicts(files) {
-  const rules = [
-    {
-      label: '同一微信允许多个账号',
-      pattern: /同(?:一|一个)微信(?:号)?[^。\n]{0,48}(?:多个|多份|不同)[^。\n]{0,20}账号/g,
-    },
-    {
-      label: '同一账号允许多个微信',
-      pattern: /同(?:一|一个)账号[^。\n]{0,48}(?:多个|不同)[^。\n]{0,20}微信/g,
-    },
-    {
-      label: '微信只作为会话凭证',
-      pattern: /微信[^。\n]{0,20}(?:仅作|仅作为)[^。\n]{0,24}(?:会话|凭证)/g,
-    },
-    {
-      label: '取消一对一绑定',
-      pattern: /(?:去掉|移除|解除)[^。\n]{0,36}(?:一对一|只能绑定|绑定限制)/g,
-    },
-    {
-      label: '不再强制唯一绑定',
-      pattern: /不再强制[^。\n]{0,28}(?:一对一|双向唯一|绑定)/g,
-    },
-    {
-      label: '找回依赖最近登录记录',
-      pattern: /找回[^。\n]{0,48}最近一次登录记录/g,
-    },
-  ];
-  const conflicts = [];
-  for (const file of files) {
-    const source = read(file);
-    for (const rule of rules) {
-      rule.pattern.lastIndex = 0;
-      let match;
-      while ((match = rule.pattern.exec(source))) {
-        conflicts.push(
-          `${relative(file)}:${lineNumber(source, match.index)} [${rule.label}] ${match[0].trim()}`,
-        );
-      }
-    }
-  }
-  return conflicts;
-}
-
 console.log('数字工匠 · 本地只读发布验收');
 console.log(`项目目录：${ROOT}`);
 console.log('安全边界：仅分析本地文件；不调用云函数、不连接数据库、不执行上传或部署。\n');
@@ -388,71 +345,66 @@ if (!miniprogramRoot || !cloudfunctionRoot) {
     return `${EXPECTED_COLLECTIONS.length} 个关键集合均有不可读写说明`;
   });
 
-  check('注册实现“一微信一账号”双向唯一绑定', () => {
+  check('注册实现多账号微信身份索引', () => {
     const source = read(path.join(cloudfunctionRoot, 'register', 'index.js'));
     const requirements = [
       ['全局绑定集合', /identity_bindings/],
-      ['微信身份键', /wechat-\$\{openidHash\}/],
+      ['微信账号复合身份键', /wechat-\$\{openidHash\}-\$\{account\}/],
       ['学生账号身份键', /principal-student-\$\{sha256\(account\)\}/],
       ['企业账号身份键', /principal-enterprise-\$\{sha256\(account\)\}/],
       ['账号绑定微信哈希', /boundOpenidHash\s*:\s*openidHash/],
-      ['微信已有账号冲突码', /WECHAT_HAS_ACCOUNT/],
-      ['学生旧绑定迁移校验', /account_bindings[^\n]{0,100}openidBindingId|account_bindings[\s\S]{0,180}openidBindingId/],
-      ['企业旧绑定迁移校验', /enterprise_bindings[^\n]{0,100}openidBindingId|enterprise_bindings[\s\S]{0,180}openidBindingId/],
+      ['学生旧绑定兼容写入', /account_bindings/],
+      ['企业旧绑定兼容写入', /enterprise_bindings/],
       ['事务保护', /db\.runTransaction/],
     ];
     const missing = requirements.filter(([, pattern]) => !pattern.test(source)).map(([label]) => label);
     assert(!missing.length, `register 缺少：${missing.join('、')}`);
-    return '学生与企业注册共用全局微信绑定，并在事务中校验';
+    return '微信+账号复合索引避免同一微信切换账号时互相覆盖';
   });
 
-  check('登录实现“一微信一账号”双向校验', () => {
+  check('登录按账号刷新当前微信身份', () => {
     const source = read(path.join(cloudfunctionRoot, 'login', 'index.js'));
     const requirements = [
       ['全局绑定集合', /identity_bindings/],
-      ['微信身份键', /wechat-\$\{openidHash\}/],
+      ['微信账号复合身份键', /wechat-\$\{openidHash\}-\$\{account\}/],
       ['角色账号身份键', /principal-\$\{role\}-\$\{sha256\(account\)\}/],
-      ['账号绑定微信哈希校验', /boundOpenidHash[^\n]{0,100}openidHash/],
-      ['微信冲突处理', /WECHAT_BOUND_ELSEWHERE/],
-      ['账号冲突处理', /ACCOUNT_BOUND_ELSEWHERE/],
-      ['事务保护', /db\.runTransaction/],
+      ['账号绑定微信哈希刷新', /boundOpenidHash\s*:\s*openidHash/],
+      ['会话绑定当前微信', /openid:\s*OPENID/],
+      ['账号密码校验', /safeEqual\(candidateHash,\s*companyAccount\.passwordHash\)/],
     ];
     const missing = requirements.filter(([, pattern]) => !pattern.test(source)).map(([label]) => label);
     assert(!missing.length, `login 缺少：${missing.join('、')}`);
-    return '登录同时校验微信侧和账号侧绑定';
+    return '登录以账号密码为主，并将会话与当前微信绑定';
   });
 
-  check('找回密码复核全局唯一绑定', () => {
+  check('找回密码复核账号最近登录微信', () => {
     const source = read(path.join(cloudfunctionRoot, 'recoverAccount', 'index.js'));
     const requirements = [
       ['全局绑定集合', /identity_bindings/],
-      ['微信身份键', /wechat-\$\{openidHash\}/],
       ['角色账号身份键', /principal-\$\{role\}-\$\{sha256\(account\)\}/],
       ['账号绑定微信哈希校验', /boundOpenidHash[^\n]{0,100}openidHash/],
+      ['按微信列出账号', /where\(\{[\s\S]{0,160}openidHash/],
       ['事务中的绑定变化保护', /BINDING_CHANGED/],
     ];
     const missing = requirements.filter(([, pattern]) => !pattern.test(source)).map(([label]) => label);
     assert(!missing.length, `recoverAccount 缺少：${missing.join('、')}`);
-    return '查询与重置密码均要求当前微信、账号和全局绑定一致';
+    return '查询与重置均交叉校验账号文档和 principal 身份记录';
   });
 
-  check('旧的多账号/多微信覆盖文案已清除', () => {
-    const rootMarkdown = fs.readdirSync(ROOT, { withFileTypes: true })
-      .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-      .map((entry) => path.join(ROOT, entry.name));
-    const policyFiles = [
-      ...rootMarkdown,
-      ...listFiles(miniprogramRoot, (file) => /\.(?:js|json|wxml)$/.test(file)),
-      path.join(cloudfunctionRoot, 'login', 'index.js'),
-      path.join(cloudfunctionRoot, 'login', 'package.json'),
-      path.join(cloudfunctionRoot, 'register', 'index.js'),
-      path.join(cloudfunctionRoot, 'register', 'package.json'),
-      path.join(cloudfunctionRoot, 'recoverAccount', 'index.js'),
-      path.join(cloudfunctionRoot, 'recoverAccount', 'package.json'),
-    ].filter((file, index, all) => fs.existsSync(file) && all.indexOf(file) === index);
-    const conflicts = findPolicyConflicts(policyFiles);
-    assert(!conflicts.length, `发现与“一微信一账号”冲突的旧表述：\n${conflicts.join('\n')}`);
-    return `${policyFiles.length} 个用户文案、认证代码和说明文件`;
+  check('用户文案与多账号登录策略一致', () => {
+    const policySources = [
+      read(path.join(ROOT, 'README.md')),
+      read(path.join(miniprogramRoot, 'pages', 'login', 'login.wxml')),
+      read(path.join(miniprogramRoot, 'pages', 'privacy', 'privacy.wxml')),
+      read(path.join(cloudfunctionRoot, 'login', 'index.js')),
+    ];
+    const missing = [];
+    if (!/同一账号可在多个微信登录/.test(policySources[0])) missing.push('README 多微信登录说明');
+    if (!/同一账号可在多个微信/.test(policySources[1])) missing.push('登录页多微信说明');
+    if (!/同一微信也可登录多个账号/.test(policySources[2])) missing.push('隐私页多账号说明');
+    if (!/账号密码为主/.test(policySources[3])) missing.push('登录云函数策略注释');
+    assert(!missing.length, `缺少或不一致：${missing.join('、')}`);
+    return 'README、登录页、隐私页和云函数均采用同一账号策略';
   });
 }
 

@@ -170,18 +170,31 @@ async function run() {
   assert.equal(retry.companyId, firstCompanyId);
   assert.equal(Object.keys(harness.store.company_accounts).length, 1);
 
-  // 3. 同一微信注册第二个账号会被明确阻止，而不是覆盖旧绑定或返回模糊 code 99。
+  // 3. 同一微信可以注册第二个账号；复合身份键不能覆盖第一个账号。
   const sameWechatSecondAccount = await register.main(enterpriseEvent('TECHH2'));
-  assert.equal(sameWechatSecondAccount.code, 409);
-  assert.equal(sameWechatSecondAccount.reason, 'wechat_has_account');
-  assert.equal(harness.store.company_accounts.TECHH2, undefined);
+  assert.equal(sameWechatSecondAccount.code, 0);
+  assert.equal(sameWechatSecondAccount.idempotent, false);
+  assert.ok(harness.store.company_accounts.TECHH2);
+  assert.equal(Object.keys(harness.store.company_accounts).length, 2);
+  assert.equal(
+    Object.values(harness.store.identity_bindings)
+      .filter((item) => item.type === 'wechat').length,
+    2,
+  );
 
-  // 4. 其他微信抢同一账号只收到“账号已存在”，不泄露密码或绑定详情。
+  // 4. 其他微信用错误密码重复注册只收到“账号已存在”，不泄露校验详情。
   harness.setOpenid('openid-enterprise-two');
-  const otherWechatSameAccount = await register.main(enterpriseEvent());
+  const otherWechatSameAccount = await register.main(enterpriseEvent('TECHHR', {
+    password: 'WrongPassword123',
+  }));
   assert.equal(otherWechatSameAccount.code, 409);
   assert.equal(otherWechatSameAccount.reason, 'account_exists');
   assert.equal(otherWechatSameAccount.passwordMatches, undefined);
+
+  // 正确账号密码从另一微信重复提交保持幂等；后续登录负责刷新当前微信身份。
+  const otherWechatCorrectPassword = await register.main(enterpriseEvent());
+  assert.equal(otherWechatCorrectPassword.code, 0);
+  assert.equal(otherWechatCorrectPassword.idempotent, true);
 
   // 5. 缺集合、权限错误分别映射为可定位的服务错误，且事务不留下半条账号。
   harness.reset();
@@ -231,7 +244,7 @@ async function run() {
   assert.ok(harness.store.company_accounts.LEGACY1);
   assert.equal(Object.keys(harness.store.enterprise_bindings).length, 0);
 
-  console.log('register enterprise mock tests: 8/8 passed');
+  console.log('register enterprise mock tests: 9/9 passed');
 }
 
 run().catch((error) => {

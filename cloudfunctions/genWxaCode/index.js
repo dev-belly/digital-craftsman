@@ -108,6 +108,6 @@ exports.main = async (event) => {
     return { code: 0, fileID, tempURL, envVersion, cached: false };
   } catch (error) {
     console.error('生成小程序码失败', error);
-    return { code: 99, msg: error.message || '生成小程序码失败' };
+    return { code: 99, msg: '生成小程序码失败，请稍后重试' };
   }
 };
