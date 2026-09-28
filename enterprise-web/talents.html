@@ -80,9 +80,13 @@
     var ENV_ID = 'cloud1-d9g3gsolf1c9841d7';
     // 档案详情页地址(用于"查看档案"),部署后按需修改
     var ARCHIVE_URL = 'index.html';
-    var app, currentUid = '';
+    var app, currentUid = '', renderedTalents = [];
 
-    function esc(s) { return (s || '').replace(/</g, '&lt;'); }
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
 
     async function init() {
       try {
@@ -90,7 +94,7 @@
         await app.auth({ persistence: 'local' }).signInAnonymously();
         search();
       } catch (e) {
-        document.getElementById('list').innerHTML = '<div class="empty">初始化失败:' + (e.message || '检查环境ID') + '</div>';
+        document.getElementById('list').innerHTML = '<div class="empty">初始化失败:' + esc(e.message || '检查环境ID') + '</div>';
       }
     }
 
@@ -106,32 +110,42 @@
           document.getElementById('list').innerHTML = '<div class="empty">检索失败</div>';
         }
       } catch (e) {
-        document.getElementById('list').innerHTML = '<div class="empty">出错:' + (e.message || '') + '</div>';
+        document.getElementById('list').innerHTML = '<div class="empty">出错:' + esc(e.message || '') + '</div>';
       }
     }
 
     function render(talents) {
+      renderedTalents = talents;
       document.getElementById('count').textContent = '共 ' + talents.length + ' 位候选人';
       if (!talents.length) { document.getElementById('list').innerHTML = '<div class="empty">没有符合条件的人才</div>'; return; }
-      document.getElementById('list').innerHTML = talents.map(function (t) {
+      document.getElementById('list').innerHTML = talents.map(function (t, index) {
         var tags = (t.skillTags || []).slice(0, 6).map(function (s) { return '<span class="tag">' + esc(s) + '</span>'; }).join('');
         return '<div class="card">' +
           '<div class="row1">' +
             '<div class="avatar">' + esc((t.name || '匠')[0]) + '</div>' +
             '<div class="info"><div class="name">' + esc(t.name) + '</div>' +
               '<div class="meta">' + esc(t.school || '') + ' · ' + esc(t.major || '') + '</div></div>' +
-            '<div class="idx"><b>' + (t.talentIndex || 0) + '</b><span>人才指数</span></div>' +
+            '<div class="idx"><b>' + esc(t.talentIndex || 0) + '</b><span>人才指数</span></div>' +
           '</div>' +
           '<div class="tags">' + (tags || '<span class="meta" style="color:#8a8a8a">暂无技能标签</span>') + '</div>' +
           '<div class="acts">' +
-            '<button class="btn-view" onclick="viewArchive(\'' + t._id + '\')">查看档案</button>' +
-            '<button class="btn-invite" onclick="openInvite(\'' + t._id + '\',\'' + esc(t.name) + '\')">发起邀约</button>' +
+            '<button class="btn-view" data-talent-action="view" data-index="' + index + '">查看档案</button>' +
+            '<button class="btn-invite" data-talent-action="invite" data-index="' + index + '">发起邀约</button>' +
           '</div>' +
         '</div>';
       }).join('');
     }
 
-    function viewArchive(uid) { location.href = ARCHIVE_URL + '?uid=' + uid; }
+    document.getElementById('list').addEventListener('click', function (event) {
+      var button = event.target.closest('button[data-talent-action]');
+      if (!button || !document.getElementById('list').contains(button)) return;
+      var talent = renderedTalents[Number(button.getAttribute('data-index'))];
+      if (!talent) return;
+      if (button.getAttribute('data-talent-action') === 'view') viewArchive(talent._id);
+      if (button.getAttribute('data-talent-action') === 'invite') openInvite(talent._id, talent.name);
+    });
+
+    function viewArchive(uid) { location.href = ARCHIVE_URL + '?uid=' + encodeURIComponent(uid); }
 
     function openInvite(uid, name) {
       currentUid = uid;

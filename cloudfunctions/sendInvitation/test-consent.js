@@ -9,6 +9,8 @@ const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 const users = {
   'stu-hidden': { name: '隐藏学生', talentPoolVisible: false, isDemo: false },
   'stu-visible': { name: '公开学生', talentPoolVisible: true, isDemo: false },
+  'demo-legacy': { name: '原始演示', isDemo: true },
+  'demo-hidden': { name: '退出演示', talentPoolVisible: false, isDemo: true },
 };
 const invitations = [];
 let failInvitationQuery = false;
@@ -96,12 +98,20 @@ async function run() {
   assert.equal(hidden.code, 403);
   assert.equal(invitations.length, 0);
 
+  const hiddenDemo = await sendInvitation.main(event('demo-hidden'));
+  assert.equal(hiddenDemo.code, 403);
+  assert.equal(invitations.length, 0);
+
+  const legacyDemo = await sendInvitation.main(event('demo-legacy'));
+  assert.equal(legacyDemo.code, 0);
+  assert.equal(invitations.length, 1);
+
   const visible = await sendInvitation.main(event('stu-visible'));
   assert.equal(visible.code, 0);
-  assert.equal(invitations.length, 1);
+  assert.equal(invitations.length, 2);
   const duplicate = await sendInvitation.main(event('stu-visible'));
   assert.equal(duplicate.duplicated, true);
-  assert.equal(invitations.length, 1);
+  assert.equal(invitations.length, 2);
 
   failInvitationQuery = true;
   const originalConsoleError = console.error;
@@ -109,7 +119,7 @@ async function run() {
   try {
     const failedLookup = await sendInvitation.main(event('stu-visible', { type: '实习' }));
     assert.equal(failedLookup.code, 99);
-    assert.equal(invitations.length, 1);
+    assert.equal(invitations.length, 2);
   } finally {
     console.error = originalConsoleError;
   }

@@ -24,6 +24,14 @@ function skillTagsOf(user) {
     : [];
 }
 
+function isTalentVisible(user) {
+  // Old seeded demo profiles have no visibility field. A saved explicit opt-out
+  // must still take effect for those profiles.
+  return user.isDemo
+    ? user.talentPoolVisible !== false
+    : user.talentPoolVisible === true;
+}
+
 function matchesKeyword(user, keyword) {
   if (!keyword) return true;
   const target = keyword.toLocaleLowerCase();
@@ -185,7 +193,7 @@ exports.main = async (event) => {
     // 组合索引、数组正则等容易因不同云环境配置而失败的查询能力。
     const candidateUsers = await loadCandidateUsers(demoOnly);
     const talentRows = candidateUsers
-      .filter((user) => (demoOnly ? user.isDemo : user.isDemo || user.talentPoolVisible))
+      .filter((user) => (!demoOnly || user.isDemo) && isTalentVisible(user))
       .filter((user) => (Number(user.talentIndex) || 0) >= safeMinIndex)
       .filter((user) => matchesKeyword(user, cleanKeyword))
       .sort((left, right) => {

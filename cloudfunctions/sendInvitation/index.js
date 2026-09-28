@@ -68,8 +68,11 @@ exports.main = async (event) => {
     const userRes = await db.collection('users').doc(uid).get().catch(() => ({ data: null }));
     if (!userRes.data) return { code: 2, msg: '学生档案不存在' };
     // 与 listTalents 的可见范围一致。客户端列表隐藏不等于服务端授权：
-    // 已退出企业人才池的非演示学生，即使企业知道 uid，也不能被直接邀约。
-    if (!userRes.data.isDemo && userRes.data.talentPoolVisible !== true) {
+    // 旧演示档案没有可见性字段，可继续展示；显式退出后同样不得被邀约。
+    const talentVisible = userRes.data.isDemo
+      ? userRes.data.talentPoolVisible !== false
+      : userRes.data.talentPoolVisible === true;
+    if (!talentVisible) {
       return { code: 403, msg: '该学生未开放企业人才池邀约' };
     }
 

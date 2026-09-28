@@ -133,7 +133,11 @@
       return m ? decodeURIComponent(m[1]) : '';
     }
 
-    function esc(s) { return (s || '').replace(/</g, '&lt;'); }
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
 
     async function init() {
       uid = getUid();
@@ -189,7 +193,7 @@
       document.getElementById('evals').innerHTML = d.evaluations.length
         ? d.evaluations.map(function (e) {
             return '<div class="row"><div class="t">' + esc(e.companyName) +
-              ' <span style="color:#f5a623">' + e.score + '分</span></div>' +
+              ' <span style="color:#f5a623">' + esc(e.score) + '分</span></div>' +
               '<div class="s">' + esc(e.content) + '</div>' +
               '<div style="margin-top:6px"><span class="badge">✓ 数字签名 · 已存证</span></div></div>';
           }).join('')
