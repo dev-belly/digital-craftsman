@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "node cloudfunctions/register/test-enterprise-registration.js && node cloudfunctions/recoverAccount/test-find-accounts.js",
+    "test": "node cloudfunctions/register/test-enterprise-registration.js && node cloudfunctions/recoverAccount/test-find-accounts.js && node cloudfunctions/sendInvitation/test-consent.js",
     "verify": "node scripts/verifyReleaseReadiness.js",
     "check": "npm test && npm run verify"
   },

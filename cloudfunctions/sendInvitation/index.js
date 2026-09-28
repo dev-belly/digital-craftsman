@@ -67,6 +67,11 @@ exports.main = async (event) => {
     // 确认学生存在
     const userRes = await db.collection('users').doc(uid).get().catch(() => ({ data: null }));
     if (!userRes.data) return { code: 2, msg: '学生档案不存在' };
+    // 与 listTalents 的可见范围一致。客户端列表隐藏不等于服务端授权：
+    // 已退出企业人才池的非演示学生，即使企业知道 uid，也不能被直接邀约。
+    if (!userRes.data.isDemo && userRes.data.talentPoolVisible !== true) {
+      return { code: 403, msg: '该学生未开放企业人才池邀约' };
+    }
 
     // 同一企业已向该学生发送过同类型且尚未结束（pending/accepted）的邀约时，
     // 直接返回已存在的邀约，避免重复邀约刷屏；已被婉拒的可重新发送。
@@ -78,8 +83,7 @@ exports.main = async (event) => {
         status: _.in(['pending', 'accepted']),
       })
       .limit(1)
-      .get()
-      .catch(() => ({ data: [] }));
+      .get();
     if (existingRes.data && existingRes.data.length) {
       const existing = existingRes.data[0];
       return {
