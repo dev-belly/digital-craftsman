@@ -180,6 +180,7 @@ exports.main = async (event) => {
         msg: '该认证已签发，请勿重复提交',
         certificationId,
         evidenceHash: existingRes.data.evidenceHash || '',
+        serialNo: existingRes.data.serialNo || '',
         talentIndex,
         duplicated: true,
       };
@@ -208,33 +209,42 @@ exports.main = async (event) => {
       .get();
     const stageId = stageQuery.data[0] ? stageQuery.data[0]._id : `${uid}-stage-2`;
 
-    await db.runTransaction(async (transaction) => {
+    const transactionResult = await db.runTransaction(async (transaction) => {
       const [freshCertRes, freshUserRes, stageRes] = await Promise.all([
         getOptionalDocument(transaction.collection('certifications').doc(certificationId)),
         getOptionalDocument(transaction.collection('users').doc(uid)),
         getOptionalDocument(transaction.collection('stages').doc(stageId)),
       ]);
-      if (freshCertRes.data) return;
+      // The preflight read can race another request using the same key. Resolve
+      // ownership and response evidence again from the committed transaction row.
+      if (freshCertRes.data) {
+        if (freshCertRes.data.uid !== uid
+          || freshCertRes.data.issuerId !== enterprise.companyId) {
+          return { error: { code: 409, msg: '请求编号已被使用，请重新打开签发窗口' } };
+        }
+        return { duplicated: true, certification: freshCertRes.data };
+      }
       if (!freshUserRes.data) throw new Error('STUDENT_NOT_FOUND');
 
+      const certification = {
+        uid,
+        certName: nameResult.value,
+        issuer,
+        issuerId: enterprise.companyId,
+        issuerType: 'enterprise',
+        level,
+        serialNo,
+        issueDate: now,
+        issueAt: now,
+        issuedAt: now,
+        evidenceHash,
+        verificationStatus: 'enterprise_issued',
+        requestId: requestResult.value,
+        createdAt: now,
+        updatedAt: now,
+      };
       await transaction.collection('certifications').doc(certificationId).set({
-        data: {
-          uid,
-          certName: nameResult.value,
-          issuer,
-          issuerId: enterprise.companyId,
-          issuerType: 'enterprise',
-          level,
-          serialNo,
-          issueDate: now,
-          issueAt: now,
-          issuedAt: now,
-          evidenceHash,
-          verificationStatus: 'enterprise_issued',
-          requestId: requestResult.value,
-          createdAt: now,
-          updatedAt: now,
-        },
+        data: certification,
       });
       await transaction.collection('attestations').doc(attestationId).set({
         data: {
@@ -268,7 +278,9 @@ exports.main = async (event) => {
           },
         });
       }
+      return { duplicated: false, certification };
     });
+    if (transactionResult.error) return transactionResult.error;
 
     const talentIndex = await recalcTalentIndex(uid).catch((error) => {
       console.error('认证已写入，但人才指数重算失败', error);
@@ -280,14 +292,17 @@ exports.main = async (event) => {
         return false;
       });
 
+    const certification = transactionResult.certification;
     return {
       code: 0,
-      msg: '认证已签发并生成哈希校验记录',
+      msg: transactionResult.duplicated ? '该认证已签发，请勿重复提交'
+        : '认证已签发并生成哈希校验记录',
       certificationId,
-      evidenceHash,
-      serialNo,
+      evidenceHash: certification.evidenceHash,
+      serialNo: certification.serialNo,
       talentIndex,
       talentStageCompleted,
+      duplicated: transactionResult.duplicated,
     };
   } catch (error) {
     if (String(error && error.message).includes('STUDENT_NOT_FOUND')) {
