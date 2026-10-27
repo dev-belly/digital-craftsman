@@ -43,9 +43,9 @@ function createPasswordHash(password, salt) {
 
 function dateValue(value) {
   if (!value) return 0;
-  if (value instanceof Date) return value.getTime();
-  if (value.$date) return new Date(value.$date).getTime();
-  return new Date(value).getTime();
+  const timestamp = value instanceof Date ? value.getTime()
+    : new Date(value.$date || value).getTime();
+  return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
 function validateNewPassword(password) {
