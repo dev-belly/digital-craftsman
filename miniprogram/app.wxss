@@ -7,8 +7,8 @@ page {
   --brand-50: #eef4ff;
   --text-900: #172033;
   --text-700: #344054;
-  --text-500: #667085;
-  --text-400: #98a2b3;
+  --text-500: #526077;
+  --text-400: #6c788b;
   --surface: #ffffff;
   --surface-soft: #f6f8fc;
   --line: #e2e8f0;
@@ -16,17 +16,17 @@ page {
   --danger-600: #c73d3d;
   --danger-50: #fff2f2;
   --gold-600: #b7791f;
-  --radius-control: 16rpx;
-  --radius-card: 24rpx;
+  --radius-control: 22rpx;
+  --radius-card: 30rpx;
   --shadow-button: 0 8rpx 20rpx rgba(36, 87, 214, 0.16);
-  --shadow-card: 0 10rpx 32rpx rgba(29, 49, 82, 0.07);
+  --shadow-card: 0 10rpx 32rpx rgba(29, 49, 82, 0.045);
 
   /* 兼容现有页面 */
   --primary: var(--brand-600);
   --primary-light: var(--brand-50);
   --text-main: var(--text-900);
   --text-sub: var(--text-500);
-  --bg: #f5f7fb;
+  --bg: #f6f7fa;
   --card: var(--surface);
   --success: var(--success-600);
   --gold: #e6a23c;
