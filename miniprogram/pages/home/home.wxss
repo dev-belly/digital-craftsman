@@ -60,12 +60,12 @@ page {
 .identity-card {
   position: relative;
   overflow: hidden;
-  padding: 32rpx 30rpx 24rpx;
+  padding: 42rpx 32rpx 28rpx;
   margin-bottom: 22rpx;
-  border-radius: 26rpx;
-  background: linear-gradient(135deg, #173a84 0%, #2457bc 58%, #3775e8 100%);
+  border-radius: 34rpx;
+  background: linear-gradient(135deg, #192b52 0%, #254778 58%, #426aab 100%);
   color: #fff;
-  box-shadow: 0 16rpx 38rpx rgba(30, 75, 166, 0.22);
+  box-shadow: 0 16rpx 38rpx rgba(27, 48, 88, 0.16);
 }
 
 .identity-glow {

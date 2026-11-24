@@ -52,6 +52,10 @@ Page({
     this.loadData();
   },
 
+  onUnload() {
+    this.archiveRevision = (this.archiveRevision || 0) + 1;
+  },
+
   refreshSession() {
     const session = auth.getSession();
     if (!session) return false;
@@ -62,6 +66,8 @@ Page({
 
   async loadData() {
     if (!this.uid || !this.sessionToken) return;
+    const revision = (this.archiveRevision || 0) + 1;
+    this.archiveRevision = revision;
     this.setData({ loading: !this.data.user, error: '' });
     try {
       const res = await wx.cloud.callFunction({
@@ -73,6 +79,7 @@ Page({
           trackScan: false,
         },
       });
+      if (revision !== this.archiveRevision) return;
       const result = res.result || {};
       if (auth.handleExpired(result)) return;
       if (result.code !== 0 || !result.data) {
@@ -123,6 +130,7 @@ Page({
       });
       if (!this.data.wxaCodeUrl) this.loadWxaCode();
     } catch (error) {
+      if (revision !== this.archiveRevision) return;
       console.error('首页加载失败', error);
       this.setData({ loading: false, error: '云端连接失败，请检查网络后重试' });
     }
